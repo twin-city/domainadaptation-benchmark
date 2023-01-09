@@ -63,3 +63,5 @@ python convert.py --input-folder /home/raphael/work/datasets/ADE20K_2021_17_01_n
     1  --format-only
 
 # Issues : cityscape : why do we have 8 repeat ?
+
+https://www.cis.upenn.edu/~jshi/ped_html/

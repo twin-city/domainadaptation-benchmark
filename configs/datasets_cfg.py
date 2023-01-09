@@ -1,8 +1,4 @@
-# dataset settings
-#dataset_type = 'CocoDataset'
-#data_root = 'data/coco/'
 
-from configs.paths_cfg import TWINCITY_ROOT
 
 img_norm_cfg = dict(
     mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
@@ -34,36 +30,3 @@ test_pipeline = [
             dict(type='Collect', keys=['img']),
         ])
 ]
-
-
-classes = ('Window', 'Person', 'Vehicle')
-
-twincity_train = dict(
-        pipeline=train_pipeline,
-        type='CocoDataset',
-        classes=classes,
-        ann_file=f'{TWINCITY_ROOT}/coco-train.json',
-        img_prefix=f'{TWINCITY_ROOT}')
-
-twincity_val = dict(
-        pipeline=test_pipeline,
-        type='CocoDataset',
-        classes=('Window', 'Person', 'Vehicle'),
-        ann_file=f'{TWINCITY_ROOT}/coco-val.json',
-        img_prefix=f'{TWINCITY_ROOT}')
-
-twincity_test = dict(
-        pipeline=test_pipeline,
-        type='CocoDataset',
-        classes=('Window', 'Person', 'Vehicle'),
-        ann_file=f'{TWINCITY_ROOT}/coco-test.json',
-        img_prefix=f'{TWINCITY_ROOT}')
-
-data = dict(
-    train=twincity_train,
-    val=twincity_val,
-    test=twincity_test,
-)
-
-
-evaluation = dict(interval=1, metric='bbox')
