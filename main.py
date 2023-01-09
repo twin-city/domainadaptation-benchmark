@@ -98,14 +98,12 @@ if __name__ == '__main__':
     pretrained_model_name = "coco"
     pretrained_model_path = "checkpoints/mask_rcnn_r50_caffe_fpn_mstrain-poly_3x_coco_bbox_mAP-0.408__segm_mAP-0.37_20200504_163245-42aa3d00.pth"
 
-    """
+    
 
     # With 1 classes
 
     classes = ('Window', 'Person', 'Vehicle')
     classes = ['Window']
-
-
     for (pretrained_model_name, pretrained_model_path) in pretrained_models.items():
         print(f"=== {pretrained_model_name} ===")
         for ade_size in [2054]:
@@ -126,9 +124,9 @@ if __name__ == '__main__':
 
 
 
+    """
 
-
-
+    """
 
     #%% Check ADE
     import os.path as osp
@@ -177,3 +175,4 @@ if __name__ == '__main__':
             cfg_data_ade20k.data.train.ann_file = f'../../datasets/ADE20K_2021_17_01/coco-training.json'
 
         print(build_dataset([cfg_data_ade20k.data.train]).datasets)
+    """

@@ -11,21 +11,21 @@ import os.path as osp
 def train_twincity(out_folder, classes, load_from=None, seed=0, max_epochs = 12, use_tensorboard=True):
 
         #%% cfg base
-        cfg = Config.fromfile('configs/faster_rcnn_r50_fpn_1x_cocotwincity.py') # Here val is ADE20k
+        cfg = Config.fromfile('configs/faster_rcnn_r50_fpn_1x_cityscapes.py') # Here val is ADE20k
 
         #%% Data
-        cfg_data_twincity = Config.fromfile("src/datasets/twincity.py")
-
         # Classes
         #
-        if classes is not None:
+        #if classes is not None:
             # Training
-            cfg.data.train.classes = classes
-            cfg.data.val.classes = classes
+        #    cfg.data.train.classes = classes
+        #    cfg.data.val.classes = classes
+
+        #cfg.data.val.classes
 
         # Concatenate Datasets or not
         datasets = [build_dataset([cfg.data.train])]
-        cfg.model.roi_head.bbox_head.num_classes = len(classes)
+        cfg.model.roi_head.bbox_head.num_classes = len(datasets[0].CLASSES)
         if load_from is not None:
             cfg.load_from = load_from
         model = build_detector(cfg.model)
@@ -59,8 +59,8 @@ def train_twincity(out_folder, classes, load_from=None, seed=0, max_epochs = 12,
         cfg.dump(osp.join(cfg.work_dir, "cfg.py"))
 
         #%%
-        print(cfg.data.train.classes)
-        print(cfg.data.val.classes)
+        #print(cfg.data.train.classes)
+        #print(cfg.data.val.classes)
 
         cfg.evaluation["save_best"] = "bbox_mAP"
 
@@ -71,7 +71,7 @@ def train_twincity(out_folder, classes, load_from=None, seed=0, max_epochs = 12,
 if __name__ == '__main__':
 
     max_epochs = 20
-    out_folder = f"exps/pretrain_twincity/fromscratch-1class-{max_epochs}-v3"
+    out_folder = f"exps/minimal"
     myseed = 0
     #load_from = "exps/pretrain_twincity/v2/latest.pth"
     classes = ['Person']

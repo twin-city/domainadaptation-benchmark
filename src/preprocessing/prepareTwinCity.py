@@ -3,7 +3,7 @@ import json
 import os
 
 #%%
-data_dir = "../../../datasets/twincity-dataset"
+data_dir = "../../../../datasets/twincity-dataset"
 
 # 'Saint-Augustin',
 list_of_dirs = ['Saint-Augustin','Belleville','Olympe de gouge','Pantheon','Gambetta']

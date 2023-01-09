@@ -2,10 +2,11 @@
 #dataset_type = 'CocoDataset'
 #data_root = 'data/coco/'
 
+from configs.paths_cfg import TWINCITY_ROOT
+
 img_norm_cfg = dict(
     mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
-#img_norm_cfg = dict(
-#    mean=[103.530, 116.280, 123.675], std=[1.0, 1.0, 1.0], to_rgb=False)
+
 
 train_pipeline = [
     dict(type='LoadImageFromFile'),
@@ -17,6 +18,7 @@ train_pipeline = [
     dict(type='DefaultFormatBundle'),
     dict(type='Collect', keys=['img', 'gt_bboxes', 'gt_labels']),
 ]
+
 test_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(
@@ -40,22 +42,22 @@ twincity_train = dict(
         pipeline=train_pipeline,
         type='CocoDataset',
         classes=classes,
-        ann_file='../../datasets/twincity-dataset/coco-train.json',
-        img_prefix='../../datasets/twincity-dataset')
+        ann_file=f'{TWINCITY_ROOT}/coco-train.json',
+        img_prefix=f'{TWINCITY_ROOT}')
 
 twincity_val = dict(
         pipeline=test_pipeline,
         type='CocoDataset',
         classes=('Window', 'Person', 'Vehicle'),
-        ann_file='../../datasets/twincity-dataset/coco-val.json',
-        img_prefix='../../datasets/twincity-dataset')
+        ann_file=f'{TWINCITY_ROOT}/coco-val.json',
+        img_prefix=f'{TWINCITY_ROOT}')
 
 twincity_test = dict(
         pipeline=test_pipeline,
         type='CocoDataset',
         classes=('Window', 'Person', 'Vehicle'),
-        ann_file='../../datasets/twincity-dataset/coco-test.json',
-        img_prefix='../../datasets/twincity-dataset')
+        ann_file=f'{TWINCITY_ROOT}/coco-test.json',
+        img_prefix=f'{TWINCITY_ROOT}')
 
 data = dict(
     train=twincity_train,
