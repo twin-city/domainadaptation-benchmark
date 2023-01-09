@@ -11,7 +11,7 @@ import os.path as osp
 def train_twincity(out_folder, classes, load_from=None, seed=0, max_epochs = 12, use_tensorboard=True):
 
         #%% cfg base
-        cfg = Config.fromfile('configs/faster_rcnn_r50_fpn_1x_cityscapes.py') # Here val is ADE20k
+        cfg = Config.fromfile('configs/faster_rcnn_r50_fpn_1x_carla.py') # Here val is ADE20k
 
         #%% Data
         # Classes

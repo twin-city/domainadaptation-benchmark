@@ -128,30 +128,45 @@ print("coucou")
 img_instseg = imread(img_instseg_path)
 
 
+
 #%% Filter : take only people
+
 
 
 #%% Assuming multiplication of G-B is unique per instance
 
-mask_g = torch.tensor(img_instseg[:,:,1]).unsqueeze(0)
-mask_b = torch.tensor(img_instseg[:,:,2]).unsqueeze(0)
-mask_gb = mask_g * mask_b
-
-# filter according to people
-pixels_not_people = np.logical_not(img_instseg[:,:,0]*255 == 4.)
-mask_gb[torch.tensor(pixels_not_people).unsqueeze(0)] = 0
-print(mask_gb.unique())
 
 
-# We get the unique colors, as these would be the object ids.
-obj_ids = torch.unique(mask_gb)
+img_tensor = torch.tensor(img_rgb[:,:,:3]*255, dtype=torch.uint8)
+img_tensor = torch.swapaxes(img_tensor, 2, 0)
+img_tensor = torch.swapaxes(img_tensor, 1, 2)
 
-# first id is the background, so remove it.
-obj_ids = obj_ids[1:]
 
-# split the color-encoded mask into a set of boolean masks.
-# Note that this snippet would work as well if the masks were float values instead of ints.
-masks = mask_gb == obj_ids[:, None, None]
+import torch
+
+def get_bbox(img_instseg, class_id=4.0):
+    mask_g = torch.tensor(img_instseg[:,:,1]).unsqueeze(0)
+    mask_b = torch.tensor(img_instseg[:,:,2]).unsqueeze(0)
+    mask_gb = mask_g * mask_b
+
+    # filter according to people
+    pixels_not_people = np.logical_not(img_instseg[:,:,0]*255 == class_id)
+    mask_gb[torch.tensor(pixels_not_people).unsqueeze(0)] = 0
+    # print(mask_gb.unique())
+
+
+    # We get the unique colors, as these would be the object ids.
+    obj_ids = torch.unique(mask_gb)
+
+    # first id is the background, so remove it.
+    obj_ids = obj_ids[1:]
+
+    # split the color-encoded mask into a set of boolean masks.
+    # Note that this snippet would work as well if the masks were float values instead of ints.
+    masks = mask_gb == obj_ids[:, None, None]
+    boxes = masks_to_boxes(masks)
+
+    return boxes
 
 #%%
 
@@ -196,7 +211,7 @@ from CARLA docs : https://carla.readthedocs.io/en/latest/tuto_G_bounding_boxes/
 
 
 simulation_dataset = {
-    "info": {"Town01"},
+    "info": {"maps": ["Town01"]},
 
     "licenses": [
     {
@@ -206,7 +221,9 @@ simulation_dataset = {
     }],
 
     "images": [],
-    "categories": [],
+    "categories": [
+        {"supercategory": "person", "id": 4, "name": "person" },
+    ],
     "annotations": [],
 }
 
@@ -220,36 +237,83 @@ date_captured = None
 
 
 
-img_path = "cam12/016281_rgb.jpg"
-img_id = int(img_path.split("/")[1].split("_rgb")[0])
+# img_path = "cam12/016281_rgb.jpg"
+# img_id = int(img_path.split("/")[1].split("_rgb")[0])
 
-img_dict = {
-               "license": 1,
-               "file_name": img_path,
-               "height": img_height,
-               "width": img_width,
-               "date_captured": date_captured,
-               "id": img_id
-           },
+#%%
+
+for cam_id in range(40):
+
+    file_paths = os.listdir(os.path.join(carla_root_path, f"cam{cam_id}"))
+    rgb_file_paths = [x for x in file_paths if "rgb" in x]
+
+    for img_path in rgb_file_paths:
+        img_id_str = img_path.split("_rgb")[0]
+        img_id = int(img_id_str)
+
+        #todo automatize this
+        if cam_id < 3:
+            img_instseg_path = f"cam{cam_id}/00{img_id+2}_instanceseg.jpg"
+        else:
+            img_instseg_path = f"cam{cam_id}/0{img_id+2}_instanceseg.jpg"
+
+        #todo not robust, make it robust + do it at dataset generation
+
+        try:
+            img_tensor = torch.tensor(img_rgb[:, :, :3] * 255, dtype=torch.uint8)
+            img_tensor = torch.swapaxes(img_tensor, 2, 0)
+            img_tensor = torch.swapaxes(img_tensor, 1, 2)
+            img_instseg = imread(os.path.join(carla_root_path, img_instseg_path))
+            img_bboxes = get_bbox(img_instseg, 4.0)
+
+            img_dict = {
+                           "license": 1,
+                           "file_name": f"cam{cam_id}/"+img_path,
+                           "height": img_height,
+                           "width": img_width,
+                           "date_captured": date_captured,
+                           "id": img_id,
+                           "num_pedestrian": len(img_bboxes),
+                       }
+
+            # Get the bbox
 
 
-#TODO compute COCO areas ? Add segmentations as I have them also ?
 
-annot_img_list = []
-for bbox in boxes:
-    annot_dict = {
-                "segmentation": [],
-                "area": None,
-                "iscrowd": 0,
-                "image_id": img_id,
-                "bbox": bbox
-            },
-    annot_img_list.append(annot_dict)
+            #TODO compute COCO areas ?
+            # todo get segmentation masks
 
-#todo compute categories
+            annot_img_list = []
+            for bbox in img_bboxes:
+                annot_dict = {
+                            "segmentation": [],
+                            "area": None,
+                            "iscrowd": 0,
+                            "image_id": img_id,
+                            "bbox": bbox.numpy().tolist(),
+                            "category_id": 4,
+                        },
+                annot_img_list.append(annot_dict)
+
+            #todo compute categories
+
+            simulation_dataset['images'].append(img_dict)
+
+            for annot_img_dict in annot_img_list:
+                simulation_dataset["annotations"].append(annot_img_dict)
+
+            print(f"Did read : {cam_id} {img_id}")
+        except:
+            print(f"Cound not read : {cam_id} {img_id}")
 
 
 #%% Save to right format for all
+import json
+json_path = os.path.join(carla_root_path, "coco.json")
+
+with open(json_path, 'w') as fh:
+    json.dump(simulation_dataset, fh)
+
 
 
 
