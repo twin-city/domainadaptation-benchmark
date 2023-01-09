@@ -215,7 +215,7 @@ def show(imgs):
 
 # Check bboxes
 from torchvision.utils import draw_bounding_boxes
-drawn_boxes = draw_bounding_boxes(img_tensor, img_bboxes["Vehicles"], colors="red")
+drawn_boxes = draw_bounding_boxes(img_tensor, img_bboxes["Vehicle"], colors="red")
 show(drawn_boxes)
 plt.savefig("src/preprocessing/carla_random_img.jpg")
 plt.show()
