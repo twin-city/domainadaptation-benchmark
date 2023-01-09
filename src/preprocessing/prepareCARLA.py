@@ -1,18 +1,39 @@
 from torchvision.ops import masks_to_boxes
+import os
+from matplotlib.image import imread
+import matplotlib
+import os
+import numpy as np
+import torch
+import matplotlib.pyplot as plt
+import torchvision.transforms.functional as F
+from torchvision.io import read_image
+from torchvision.utils import draw_segmentation_masks
+import torch
+from configs.paths_cfg import CARLA_ROOT
+
+
 
 
 """
 CARLA acquisitions to coco annotations
+
+To extract the bboxes : https://pytorch.org/vision/main/auto_examples/plot_repurposing_annotations.html
+
+For now take only people, and assuming multiplication of G-B is unique per instance
+
 """
 
-#%% Paths
+#todo : issue with Vehicle and Building classes : to be investigated
+
+#%% Paths & params
+ASSETS_DIRECTORY = "assets"
+plt.rcParams["savefig.bbox"] = "tight"
+carla_root_path = CARLA_ROOT
+
+#%% Load an image (test), and get height, width
 
 folder_cam12 = "/home/raphael/work/datasets/CARLA/output/fixed_spawn_Town01_v1/cam12"
-
-#%% Load an image
-import os
-from matplotlib.image import imread
-import matplotlib
 
 # Check images
 img_rgb_path = os.path.join(folder_cam12, "016281_rgb.jpg")
@@ -23,89 +44,53 @@ img_rgb = imread(img_rgb_path)
 img_seg = imread(img_seg_path)
 img_instseg = imread(img_instseg_path)
 
-
-#%%
-
-# sphinx_gallery_thumbnail_path = "../../gallery/assets/repurposing_annotations_thumbnail.png"
-
-import os
-import numpy as np
-import torch
-import matplotlib.pyplot as plt
-
-import torchvision.transforms.functional as F
+img_height = img_rgb.shape[0]
+img_width = img_rgb.shape[1]
+date_captured = None
 
 
-ASSETS_DIRECTORY = "assets"
+#%% The bboxes (cf torchvision code)
 
-plt.rcParams["savefig.bbox"] = "tight"
-
-
-def show(imgs):
-    if not isinstance(imgs, list):
-        imgs = [imgs]
-    fix, axs = plt.subplots(ncols=len(imgs), squeeze=False)
-    for i, img in enumerate(imgs):
-        img = img.detach()
-        img = F.to_pil_image(img)
-        axs[0, i].imshow(np.asarray(img))
-        axs[0, i].set(xticklabels=[], yticklabels=[], xticks=[], yticks=[])
-
-from torchvision.io import read_image
+# todo compute categories
+# See https://carla.readthedocs.io/en/latest/ref_sensors/
+classes_code = {
+    "Person": 4.0,
+    "Vehicle": 10.0,
+    "Building": 1.0,
+}
 
 
-"""
-img_path = os.path.join("src/preprocessing", "FudanPed00054.png")
-mask_path = os.path.join("src/preprocessing", "FudanPed00054_mask.png")
-img = read_image(img_path)
-mask = read_image(mask_path)
-"""
-
-
-#%% Extract bbox
-"""
-See : https://pytorch.org/vision/main/auto_examples/plot_repurposing_annotations.html
-"""
-
-
-
-
-
-#%% Filter : take only people
-#%% Assuming multiplication of G-B is unique per instance
-
-
-
-import torch
-
-def get_bbox(img_instseg, class_id=4.0):
+def get_bbox(img_instseg):
     mask_g = torch.tensor(img_instseg[:,:,1]).unsqueeze(0)
     mask_b = torch.tensor(img_instseg[:,:,2]).unsqueeze(0)
     mask_gb = mask_g * mask_b
 
+    box_classes = {}
+
     # filter according to people
-    pixels_not_people = np.logical_not(img_instseg[:,:,0]*255 == class_id)
-    mask_gb[torch.tensor(pixels_not_people).unsqueeze(0)] = 0
-    # print(mask_gb.unique())
+    for class_name, class_id in classes_code.items():
+
+        pixels_not_people = np.logical_not(img_instseg[:,:,0]*255 == class_id)
+        mask_gb[torch.tensor(pixels_not_people).unsqueeze(0)] = 0
+        # print(mask_gb.unique())
+
+        # by number of pixels
+        #for x in np.unique(img_instseg[:,:,0])*255:
+        #    print(x, (img_instseg[:, :, 0]*255 == x).sum())
 
 
-    # We get the unique colors, as these would be the object ids.
-    obj_ids = torch.unique(mask_gb)
+        # We get the unique colors, as these would be the object ids.
+        obj_ids = torch.unique(mask_gb)
 
-    # first id is the background, so remove it.
-    obj_ids = obj_ids[1:]
+        # first id is the background, so remove it.
+        obj_ids = obj_ids[1:]
 
-    # split the color-encoded mask into a set of boolean masks.
-    # Note that this snippet would work as well if the masks were float values instead of ints.
-    masks = mask_gb == obj_ids[:, None, None]
-    boxes = masks_to_boxes(masks)
-
-    return boxes
-
-#%%
-
-
-from torchvision.utils import draw_segmentation_masks
+        # split the color-encoded mask into a set of boolean masks.
+        # Note that this snippet would work as well if the masks were float values instead of ints.
+        masks = mask_gb == obj_ids[:, None, None]
+        boxes = masks_to_boxes(masks)
+        box_classes[class_name] = boxes
+    return box_classes
 
 
 #%%
@@ -119,7 +104,10 @@ from CARLA docs : https://carla.readthedocs.io/en/latest/tuto_G_bounding_boxes/
 
 
 simulation_dataset = {
-    "info": {"maps": ["Town01"]},
+    "info": {
+        "maps": ["Town01"],
+        "date": "???",
+    },
 
     "licenses": [
     {
@@ -127,32 +115,16 @@ simulation_dataset = {
         "id": 1,
         "name": "Attribution-NonCommercial-ShareAlike License"
     }],
-
     "images": [],
-    "categories": [{"id": 1, "name": "Window", "supercategory": "rdt"},
- {"id": 4, "name": "Person", "supercategory": "rdt"},
- {"id": 3, "name": "Vehicle", "supercategory": "rdt"}],
-
-
-        #[
-        #{"supercategory": "Perso,", "id": 4, "name": "Person" },
-    #],
+    "categories": [
+        {"id": 1, "name": "Building", "supercategory": "rdt"},
+        {"id": 4, "name": "Person", "supercategory": "rdt"},
+        {"id": 10, "name": "Vehicle", "supercategory": "rdt"}],
     "annotations": [],
 }
 
 
-#%% For one image
 
-carla_root_path = "/home/raphael/work/datasets/CARLA/output/fixed_spawn_Town01_v1"
-
-img_height = img_rgb.shape[0]
-img_width = img_rgb.shape[1]
-date_captured = None
-
-
-
-# img_path = "cam12/016281_rgb.jpg"
-# img_id = int(img_path.split("/")[1].split("_rgb")[0])
 
 #%%
 
@@ -160,32 +132,32 @@ print("Creating CARLA Dataset")
 
 annotation_id = 0
 
-for cam_id in range(1):
+for cam_id in range(40):
     file_paths = os.listdir(os.path.join(carla_root_path, f"cam{cam_id}"))
     rgb_file_paths = [x for x in file_paths if "rgb" in x]
 
-    for img_path in rgb_file_paths:
-        img_id_str = img_path.split("_rgb")[0]
+    for img_rgb_path in rgb_file_paths:
+        img_id_str = img_rgb_path.split("_rgb")[0]
         img_id = int(img_id_str)
+        img_rgb = imread(f"{carla_root_path}/cam{cam_id}/"+img_rgb_path)
 
-        #todo automatize this
+        # todo automatize this
         if cam_id < 3:
             img_instseg_path = f"cam{cam_id}/00{img_id+2}_instanceseg.jpg"
         else:
             img_instseg_path = f"cam{cam_id}/0{img_id+2}_instanceseg.jpg"
 
-        #todo not robust, make it robust + do it at dataset generation
-
+        # todo not robust, make it robust + do it at dataset generation
         try:
             img_tensor = torch.tensor(img_rgb[:, :, :3] * 255, dtype=torch.uint8)
             img_tensor = torch.swapaxes(img_tensor, 2, 0)
             img_tensor = torch.swapaxes(img_tensor, 1, 2)
             img_instseg = imread(os.path.join(carla_root_path, img_instseg_path))
-            img_bboxes = get_bbox(img_instseg, 4.0)
+            img_bboxes = get_bbox(img_instseg)
 
             img_dict = {
                            "license": 1,
-                           "file_name": f"cam{cam_id}/"+img_path,
+                           "file_name": f"cam{cam_id}/"+img_rgb_path,
                            "height": img_height,
                            "width": img_width,
                            "date_captured": date_captured,
@@ -193,38 +165,30 @@ for cam_id in range(1):
                            "num_pedestrian": len(img_bboxes),
                        }
 
-            # Get the bbox
-
-
-
-            #TODO compute COCO areas ?
-            # todo get segmentation masks
-
+            # Get the bbox (separated by class id)
             annot_img_list = []
-            for bbox in img_bboxes:
-                annot_dict = {
-                            "id": annotation_id,
-                            "segmentation": [],
-                            "area": 10, #TODO compute the area
-                            "iscrowd": 0,
-                            "image_id": img_id,
-                            "bbox": bbox.numpy().tolist(),
-                            "category_id": 4,
-                        },
-                annot_img_list.append(annot_dict)
-                annotation_id += 1
+            for class_name in classes_code.keys():
+                img_class_bboxes = img_bboxes[class_name]
+                for bbox in img_class_bboxes:
+                    annot_dict = {
+                                "id": annotation_id,
+                                "segmentation": [],
+                                "area": int((bbox[2]-bbox[0])*(bbox[3]-bbox[1])), #TODO compute the area for segmentation instead
+                                "iscrowd": 0,
+                                "image_id": img_id,
+                                "bbox": bbox.numpy().tolist(),
+                                "category_id": classes_code[class_name],
+                            },
+                    annot_img_list.append(annot_dict)
+                    annotation_id += 1
 
-            #todo compute categories
 
             simulation_dataset['images'].append(img_dict)
-
             for annot_img_dict in annot_img_list:
                 simulation_dataset["annotations"].append(annot_img_dict[0]) #TODO arrange this fix
-
             print(f"Did read : {cam_id} {img_id}")
         except:
             print(f"Could not read : {cam_id} {img_id}")
-
 
 #%% Save to right format for all
 import json
@@ -234,13 +198,41 @@ with open(json_path, 'w') as fh:
     json.dump(simulation_dataset, fh)
 
 
+
+
+#%% Check if instance seg was okay
+
+def show(imgs):
+    if not isinstance(imgs, list):
+        imgs = [imgs]
+    fix, axs = plt.subplots(ncols=len(imgs), squeeze=False, figsize=(16,8))
+    for i, img in enumerate(imgs):
+        img = img.detach()
+        img = F.to_pil_image(img)
+        axs[0, i].imshow(np.asarray(img))
+        axs[0, i].set(xticklabels=[], yticklabels=[], xticks=[], yticks=[])
+
+
+# Check bboxes
+from torchvision.utils import draw_bounding_boxes
+drawn_boxes = draw_bounding_boxes(img_tensor, img_bboxes["Vehicles"], colors="red")
+show(drawn_boxes)
+plt.savefig("src/preprocessing/carla_random_img.jpg")
+plt.show()
+
+""" Check segmentation
+drawn_masks = []
+for mask in img_bboxes["Person"]:
+    drawn_masks.append(draw_segmentation_masks(img_tensor, mask, alpha=0.8, colors="blue"))
+show(drawn_masks) # 1 is people
+plt.show()
+"""
+
+
+
 #%%
-simulation_dataset
+""" For the debugging
 
-
-
-
-#%%
 from configs.paths_cfg import TWINCITY_ROOT
 import json
 import os
@@ -250,8 +242,6 @@ twincity_path = os.path.join(TWINCITY_ROOT, "coco-val.json")
 with open(twincity_path) as jsonFile:
     twincity_dataset = json.load(jsonFile)
 
-#%%
-"""
 
 import torchvision.transforms.functional as F
 
@@ -338,5 +328,19 @@ twincity_path = os.path.join(TWINCITY_ROOT, "coco-val.json")
 with open(twincity_path) as jsonFile:
     building_json = json.load(jsonFile)
     
-    
+
+def show(imgs):
+    if not isinstance(imgs, list):
+        imgs = [imgs]
+    fix, axs = plt.subplots(ncols=len(imgs), squeeze=False)
+    for i, img in enumerate(imgs):
+        img = img.detach()
+        img = F.to_pil_image(img)
+        axs[0, i].imshow(np.asarray(img))
+        axs[0, i].set(xticklabels=[], yticklabels=[], xticks=[], yticks=[])
+img_path = os.path.join("src/preprocessing", "FudanPed00054.png")
+mask_path = os.path.join("src/preprocessing", "FudanPed00054_mask.png")
+img = read_image(img_path)
+mask = read_image(mask_path)
+
 """
