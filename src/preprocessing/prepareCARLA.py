@@ -192,7 +192,7 @@ for cam_id in range(40):
 
 #%% Save to right format for all
 import json
-json_path = os.path.join(carla_root_path, "coco.json")
+json_path = os.path.join(carla_root_path, "legacy/coco.json")
 
 with open(json_path, 'w') as fh:
     json.dump(simulation_dataset, fh)

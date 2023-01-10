@@ -3,7 +3,7 @@ import os
 
 _base_ = [
     os.path.join(MMDETECTION_ROOT, 'configs/_base_/models/faster_rcnn_r50_fpn.py'),
-    '../../src/datasets/carla_detection.py',
+    '../../configs/datasets/carla_detection.py',
     os.path.join(MMDETECTION_ROOT, 'configs/_base_/schedules/schedule_1x.py'),
     os.path.join(MMDETECTION_ROOT, 'configs/_base_/default_runtime.py'),
 ]

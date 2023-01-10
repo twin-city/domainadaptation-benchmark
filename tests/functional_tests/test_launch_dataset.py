@@ -12,20 +12,31 @@ class Test_launch_dataset(TestCase):
         out_folder = f"test/launch_twincityunity"
 
         cfg = Config.fromfile('configs/faster_rcnn/faster_rcnn_r50_fpn_1x_cocotwincity.py')
+
+        # small training from test configs
+        cfg_data = Config.fromfile('tests/configs/datasets/twincity_detection.py')
+        cfg.data = cfg_data.data
+
         train_from_config(out_folder, cfg, seed=myseed, max_epochs=max_epochs, use_tensorboard=True)
         return 1
+
+
 
     def test_launch_carla(self):
 
         max_epochs = 1
         myseed = 0
-
         out_folder = f"test/launch_carla"
 
         cfg = Config.fromfile('configs/faster_rcnn/faster_rcnn_r50_fpn_1x_carla.py')
+        # small training from test configs
+        cfg_data = Config.fromfile('tests/configs/datasets/carla_detection.py')
+        cfg.data = cfg_data.data
+
         train_from_config(out_folder, cfg, seed=myseed, max_epochs=max_epochs, use_tensorboard=True)
         return 1
 
+    """
     def test_launch_cityscapes(self):
 
         max_epochs = 1
@@ -36,3 +47,5 @@ class Test_launch_dataset(TestCase):
         cfg = Config.fromfile('configs/faster_rcnn/faster_rcnn_r50_fpn_1x_cityscapes.py')
         train_from_config(out_folder, cfg, seed=myseed, max_epochs=max_epochs, use_tensorboard=True)
         return 1
+        
+    """

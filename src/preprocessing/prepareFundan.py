@@ -163,7 +163,7 @@ for img_rgb_path in rgb_file_paths:
 
 #%% Save to right format for all
 import json
-json_path = os.path.join(PENNFUDANPED_ROOT, "coco.json")
+json_path = os.path.join(PENNFUDANPED_ROOT, "legacy/coco.json")
 
 with open(json_path, 'w') as fh:
     json.dump(simulation_dataset, fh)
