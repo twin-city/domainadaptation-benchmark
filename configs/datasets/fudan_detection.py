@@ -7,7 +7,7 @@ See https://github.com/alexchungio/mmdetection-demo
 from configs.paths_cfg import PENNFUDANPED_ROOT
 from configs.datasets_cfg import train_pipeline, test_pipeline
 
-dataset_type = 'VOCDataset'
+dataset_type = 'CocoDataset'
 classes = ['Person']
 
 carla_train = dict(
@@ -41,7 +41,7 @@ data = dict(
 evaluation = dict(interval=1, metric='bbox')
 
 
-
+"""
 
 # dataset settings
 dataset_type = 'VOCDataset'
@@ -98,3 +98,5 @@ data = dict(
         img_prefix=data_root + 'VOC2007/',
         pipeline=test_pipeline))
 evaluation = dict(interval=1, metric='mAP')
+
+"""

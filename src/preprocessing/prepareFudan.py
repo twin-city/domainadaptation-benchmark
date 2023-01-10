@@ -20,7 +20,6 @@ https://github.com/omarfoq/Pedestrian_Detection/blob/master/utils/dataset.py
 Or try Pascal 2 Coco : https://blog.roboflow.com/how-to-convert-annotations-from-voc-xml-to-coco-json/
 """
 
-#todo : issue with Vehicle and Building classes : to be investigated
 
 #%% Paths & params
 ASSETS_DIRECTORY = "assets"
@@ -89,7 +88,12 @@ simulation_dataset = {
         "date": "2004",
     },
 
-    "licenses": [],
+    "licenses": [
+    {
+        "url": "http://creativecommons.org/licenses/by-nc-sa/2.0/",
+        "id": 1,
+        "name": "Attribution-NonCommercial-ShareAlike License"
+    }],
     "images": [],
     "categories": [
         {"id": 1, "name": "Person", "supercategory": "rdt"},
@@ -106,12 +110,11 @@ print("Creating Fudan Dataset")
 
 annotation_id = 0
 
-
 rgb_file_paths = os.listdir(os.path.join(PENNFUDANPED_ROOT, "PNGImages"))
+print(rgb_file_paths)
 
-for img_rgb_path in rgb_file_paths:
+for img_id, img_rgb_path in enumerate(np.sort(rgb_file_paths)):
     img_id_str = img_rgb_path.split("Ped")[1].split(".png")[0]
-    img_id = int(img_id_str)
     img_rgb = imread(f"{PENNFUDANPED_ROOT}/PNGImages/{img_rgb_path}")
 
     img_instseg_path = img_rgb_path.split(".png")[0]+"_mask"+".png"
@@ -126,7 +129,7 @@ for img_rgb_path in rgb_file_paths:
 
     img_dict = {
                    "license": 1,
-                   "file_name": f""+img_rgb_path,
+                   "file_name": f"PNGImages/"+img_rgb_path,
                    "height": img_height,
                    "width": img_width,
                    "date_captured": date_captured,
@@ -136,7 +139,7 @@ for img_rgb_path in rgb_file_paths:
 
     # Get the bbox (separated by class id)
     annot_img_list = []
-
+    simulation_dataset['images'].append(img_dict)
 
 
     img_class_bboxes = img_bboxes
@@ -148,13 +151,13 @@ for img_rgb_path in rgb_file_paths:
                     "iscrowd": 0,
                     "image_id": img_id,
                     "bbox": bbox.numpy().tolist(),
-                    "category_id": "Person",
+                    "category_id": 1,
                 },
         annot_img_list.append(annot_dict)
         annotation_id += 1
 
 
-    simulation_dataset['images'].append(img_dict)
+
     for annot_img_dict in annot_img_list:
         simulation_dataset["annotations"].append(annot_img_dict[0]) #TODO arrange this fix
     print(f"Did read : {img_id}")
@@ -163,13 +166,16 @@ for img_rgb_path in rgb_file_paths:
 
 #%% Save to right format for all
 import json
-json_path = os.path.join(PENNFUDANPED_ROOT, "legacy/coco.json")
+json_path = os.path.join(PENNFUDANPED_ROOT, "coco.json")
 
 with open(json_path, 'w') as fh:
     json.dump(simulation_dataset, fh)
 
-
-
+#%% Check
+#todo put this is test as number of images / bboxes / ... --> the dataset metrics (to be computed)
+print(np.sort([x["id"] for x in simulation_dataset["images"]]))
+with open(json_path) as jsonFile:
+    data = json.load(jsonFile)
 
 #%% Check if instance seg was okay
 
