@@ -26,10 +26,18 @@ def subsample_coco_json(root_path, json_name, i=100):
     # do subsampling
     coco_json_subsampled = coco_json.copy()
     coco_json_subsampled["images"] = coco_json_subsampled["images"][:i]
-    for j, annot in enumerate(coco_json_subsampled["annotations"]):
-        if annot["image_id"] >= i:
-            break
-        coco_json_subsampled["annotations"] = coco_json_subsampled["annotations"][:j]
+    set_imageid = {x["id"] for x in coco_json_subsampled["images"]}
+
+    # Reset annotations for the subsampled json
+    coco_json_subsampled["annotations"] = []
+
+    # Loop all annotations, only append those with seen image id
+    for j, annot in enumerate(coco_json["annotations"]):
+        if annot["image_id"] in set_imageid:
+            coco_json_subsampled["annotations"].append(annot)
+
+    # break # stop at first unseen image id
+    # coco_json_subsampled["annotations"] = coco_json_subsampled["annotations"][:j]
 
     # Save
     with open(osp.join(root_path, f"{json_name.split('.json')[0]}_{i}.json"), 'w') as fh:
