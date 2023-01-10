@@ -63,14 +63,12 @@ classes_code = {
 def get_bbox(img_instseg):
     mask_g = torch.tensor(img_instseg[:,:,1]).unsqueeze(0)
     mask_b = torch.tensor(img_instseg[:,:,2]).unsqueeze(0)
-    mask_gb = mask_g * mask_b
-
     box_classes = {}
 
     # filter according to people
     for class_name, class_id in classes_code.items():
-
         pixels_not_people = np.logical_not(img_instseg[:,:,0]*255 == class_id)
+        mask_gb = mask_g * mask_b
         mask_gb[torch.tensor(pixels_not_people).unsqueeze(0)] = 0
         # print(mask_gb.unique())
 
@@ -132,7 +130,7 @@ print("Creating CARLA Dataset")
 
 annotation_id = 0
 
-for cam_id in range(40):
+for cam_id in range(6,7):
     file_paths = os.listdir(os.path.join(carla_root_path, f"cam{cam_id}"))
     rgb_file_paths = [x for x in file_paths if "rgb" in x]
 
@@ -140,6 +138,9 @@ for cam_id in range(40):
         img_id_str = img_rgb_path.split("_rgb")[0]
         img_id = int(img_id_str)
         img_rgb = imread(f"{carla_root_path}/cam{cam_id}/"+img_rgb_path)
+
+        if img_id == 12041:
+            print("coucou")
 
         # todo automatize this
         if cam_id < 3:
@@ -153,7 +154,13 @@ for cam_id in range(40):
             img_tensor = torch.swapaxes(img_tensor, 2, 0)
             img_tensor = torch.swapaxes(img_tensor, 1, 2)
             img_instseg = imread(os.path.join(carla_root_path, img_instseg_path))
+
             img_bboxes = get_bbox(img_instseg)
+
+            def compute_area(bbox):
+                return int((bbox[2]-bbox[0])*(bbox[3]-bbox[1]))
+
+
 
             img_dict = {
                            "license": 1,
@@ -192,7 +199,7 @@ for cam_id in range(40):
 
 #%% Save to right format for all
 import json
-json_path = os.path.join(carla_root_path, "legacy/coco.json")
+json_path = os.path.join(carla_root_path, "coco.json")
 
 with open(json_path, 'w') as fh:
     json.dump(simulation_dataset, fh)
@@ -227,6 +234,70 @@ for mask in img_bboxes["Person"]:
 show(drawn_masks) # 1 is people
 plt.show()
 """
+
+
+
+
+
+
+#%% Check the bboxes
+
+import torch
+mask_g = torch.tensor(img_instseg[:, :, 1]).unsqueeze(0)
+mask_b = torch.tensor(img_instseg[:, :, 2]).unsqueeze(0)
+mask_gb = mask_g * mask_b
+
+box_classes = {}
+
+
+
+class_name, class_id = 'Vehicle', 4
+
+# filter according to people
+
+pixels_not_people = np.logical_not(img_instseg[:, :, 0] * 255 == class_id)
+mask_gb = mask_g * mask_b
+mask_gb[torch.tensor(pixels_not_people).unsqueeze(0)] = 0
+
+# print(mask_gb.unique())
+# by number of pixels
+# for x in np.unique(img_instseg[:,:,0])*255:
+#    print(x, (img_instseg[:, :, 0]*255 == x).sum())
+
+# We get the unique colors, as these would be the object ids.
+obj_ids = torch.unique(mask_gb)
+
+# first id is the background, so remove it.
+obj_ids = obj_ids[1:]
+
+# split the color-encoded mask into a set of boolean masks.
+# Note that this snippet would work as well if the masks were float values instead of ints.
+masks = mask_gb == obj_ids[:, None, None]
+boxes = masks_to_boxes(masks)
+
+
+def show(imgs):
+    if not isinstance(imgs, list):
+        imgs = [imgs]
+    fix, axs = plt.subplots(ncols=len(imgs), squeeze=False, figsize=(16,8))
+    for i, img in enumerate(imgs):
+        img = img.detach()
+        img = F.to_pil_image(img)
+        axs[0, i].imshow(np.asarray(img))
+        axs[0, i].set(xticklabels=[], yticklabels=[], xticks=[], yticks=[])
+
+from torchvision.utils import draw_bounding_boxes
+drawn_boxes = draw_bounding_boxes(img_tensor, boxes, colors="red")
+show(drawn_boxes)
+plt.show()
+
+
+
+
+
+
+
+
 
 
 

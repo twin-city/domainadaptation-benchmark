@@ -8,5 +8,5 @@ if __name__ == '__main__':
 
     out_folder = f"exps/test"
 
-    cfg = Config.fromfile('configs/faster_rcnn_r50_fpn_1x_cocotwincity.py')
+    cfg = Config.fromfile('configs/faster_rcnn/faster_rcnn_r50_fpn_1x_carla.py')
     train_from_config(out_folder, cfg, seed=myseed, max_epochs=max_epochs, use_tensorboard=True)
