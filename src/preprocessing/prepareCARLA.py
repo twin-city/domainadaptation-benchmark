@@ -129,8 +129,10 @@ simulation_dataset = {
 print("Creating CARLA Dataset")
 
 annotation_id = 0
+selected_img_id = []
+disgarded_img_id = []
 
-for cam_id in range(6,7):
+for cam_id in range(40):
     file_paths = os.listdir(os.path.join(carla_root_path, f"cam{cam_id}"))
     rgb_file_paths = [x for x in file_paths if "rgb" in x]
 
@@ -139,8 +141,8 @@ for cam_id in range(6,7):
         img_id = int(img_id_str)
         img_rgb = imread(f"{carla_root_path}/cam{cam_id}/"+img_rgb_path)
 
-        if img_id == 12041:
-            print("coucou")
+        # if img_id == 12041:
+        #     print("coucou")
 
         # todo automatize this
         if cam_id < 3:
@@ -170,6 +172,7 @@ for cam_id in range(6,7):
                            "date_captured": date_captured,
                            "id": img_id,
                            "num_pedestrian": len(img_bboxes),
+                           "cam_id": cam_id,
                        }
 
             # Get the bbox (separated by class id)
@@ -189,10 +192,16 @@ for cam_id in range(6,7):
                     annot_img_list.append(annot_dict)
                     annotation_id += 1
 
+            # Decide to append the image or not : criteria is maximal bbox area of car or person
+            if max([0] + [x[0]["area"] for x in annot_img_list if x[0]["category_id"] in [4]]) > 250:
+                selected_img_id.append(img_id)
+                # Append if decided
+                simulation_dataset['images'].append(img_dict)
+                for annot_img_dict in annot_img_list:
+                    simulation_dataset["annotations"].append(annot_img_dict[0]) #TODO arrange this fix
+            else:
+                disgarded_img_id.append(img_id)
 
-            simulation_dataset['images'].append(img_dict)
-            for annot_img_dict in annot_img_list:
-                simulation_dataset["annotations"].append(annot_img_dict[0]) #TODO arrange this fix
             print(f"Did read : {cam_id} {img_id}")
         except:
             print(f"Could not read : {cam_id} {img_id}")
@@ -242,13 +251,39 @@ plt.show()
 
 #%% Check the bboxes
 
+
+
+img_id = np.random.choice(selected_img_id, 1)[0]
+img_dict = [x for x in simulation_dataset["images"] if x["id"]==img_id][0]
+cam_id = img_dict["cam_id"]
+img_id_str = img_rgb_path.split("_rgb")[0]
+img_rgb = imread(f"{carla_root_path}/{img_dict['file_name']}")
+
+# if img_id == 12041:
+#     print("coucou")
+
+# todo automatize this
+if cam_id < 3:
+    img_instseg_path = f"cam{cam_id}/00{img_id + 2}_instanceseg.jpg"
+else:
+    img_instseg_path = f"cam{cam_id}/0{img_id + 2}_instanceseg.jpg"
+
+# todo not robust, make it robust + do it at dataset generation
+try:
+    img_tensor = torch.tensor(img_rgb[:, :, :3] * 255, dtype=torch.uint8)
+    img_tensor = torch.swapaxes(img_tensor, 2, 0)
+    img_tensor = torch.swapaxes(img_tensor, 1, 2)
+    img_instseg = imread(os.path.join(carla_root_path, img_instseg_path))
+    img_bboxes = get_bbox(img_instseg)
+except:
+    print("could not plot")
+
 import torch
 mask_g = torch.tensor(img_instseg[:, :, 1]).unsqueeze(0)
 mask_b = torch.tensor(img_instseg[:, :, 2]).unsqueeze(0)
 mask_gb = mask_g * mask_b
 
 box_classes = {}
-
 
 
 class_name, class_id = 'Vehicle', 4
