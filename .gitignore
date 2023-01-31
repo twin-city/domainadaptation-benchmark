@@ -4,3 +4,6 @@ legacy/
 *.pyc
 *.pth
 exps/
+
+mmsegmentation/
+mmdetection/

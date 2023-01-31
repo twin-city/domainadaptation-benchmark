@@ -22,7 +22,7 @@ conda install tensorboard
 # Installation 
 - mmdet installations
   - Be careful, it did not install cuda. From pytorch official install : *conda install pytorch torchvision torchaudio pytorch-cuda=11.6 -c pytorch -c nvidia*
-  - 
+  - Possibly downgrade setuptools by `pip install --upgrade setuptools==59.8.0` from https://stackoverflow.com/questions/71027006/assertionerror-inside-of-ensure-local-distutils-when-building-a-pyinstaller-exe
 - install for mmcv (not via conda, rather via pip as advised in website)
 
 # Dataset conversion
