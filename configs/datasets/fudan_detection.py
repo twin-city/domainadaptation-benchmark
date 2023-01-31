@@ -14,21 +14,21 @@ carla_train = dict(
         pipeline=train_pipeline,
         type=dataset_type,
         classes=classes,
-        ann_file=f'{PENNFUDANPED_ROOT}/coco.json',
+        ann_file=f'{PENNFUDANPED_ROOT}/coco_train.json',
         img_prefix=f'{PENNFUDANPED_ROOT}')
 
 carla_val = dict(
         pipeline=test_pipeline,
         type=dataset_type,
         classes=classes,
-        ann_file=f'{PENNFUDANPED_ROOT}/coco.json',
+        ann_file=f'{PENNFUDANPED_ROOT}/coco_val.json',
         img_prefix=f'{PENNFUDANPED_ROOT}')
 
 carla_test = dict(
         pipeline=test_pipeline,
         type=dataset_type,
         classes=classes,
-        ann_file=f'{PENNFUDANPED_ROOT}/coco.json',
+        ann_file=f'{PENNFUDANPED_ROOT}/coco_test.json',
         img_prefix=f'{PENNFUDANPED_ROOT}')
 
 data = dict(

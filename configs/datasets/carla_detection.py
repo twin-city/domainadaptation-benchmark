@@ -10,21 +10,21 @@ carla_train = dict(
         pipeline=train_pipeline,
         type='CocoDataset',
         classes=classes,
-        ann_file=f'{CARLA_ROOT}/coco.json',
+        ann_file=f'{CARLA_ROOT}/coco_train.json',
         img_prefix=f'{CARLA_ROOT}')
 
 carla_val = dict(
         pipeline=test_pipeline,
         type='CocoDataset',
         classes=classes,
-        ann_file=f'{CARLA_ROOT}/coco.json',
+        ann_file=f'{CARLA_ROOT}/coco_val.json',
         img_prefix=f'{CARLA_ROOT}')
 
 carla_test = dict(
         pipeline=test_pipeline,
         type='CocoDataset',
         classes=classes,
-        ann_file=f'{CARLA_ROOT}/coco.json',
+        ann_file=f'{CARLA_ROOT}/coco_test.json',
         img_prefix=f'{CARLA_ROOT}')
 
 data = dict(

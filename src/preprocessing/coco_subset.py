@@ -1,6 +1,6 @@
 import os.path as osp
 import json
-from configs.paths_cfg import TWINCITY_ROOT
+from configs.paths_cfg import TWINCITY_ROOT, MOTSYNTH_ROOT
 
 
 def subsample_coco_json(root_path, json_name, i=100):
@@ -96,8 +96,6 @@ from configs.paths_cfg import CARLA_ROOT, PENNFUDANPED_ROOT
 from src.preprocessing.coco_subset import subsample_coco_json
 
 
-
-
 #%% Subset the datasets
 
 # Subset CARLA dataset
@@ -105,13 +103,23 @@ root_path = CARLA_ROOT
 json_name = "coco.json"
 trainvaltest_coco_json(root_path, json_name) # not done for carla by hand yet
 subsample_coco_json(root_path, json_name, i=50)
+# subsample_coco_json(root_path, json_name, i=600)
 
 # Twincity
 root_path = TWINCITY_ROOT
 json_name = "coco-train.json"
 subsample_coco_json(root_path, json_name, i=50)
+# subsample_coco_json(root_path, json_name, i=600)
 
 # Fudan
 root_path = PENNFUDANPED_ROOT
 json_name = "coco.json"
+trainvaltest_coco_json(root_path, json_name)
+
+
+# MoTSynth
+import os
+root_path = os.path.join(MOTSYNTH_ROOT, "coco annot")
+json_name = "004.json"
+subsample_coco_json(root_path, json_name, i=600)
 trainvaltest_coco_json(root_path, json_name)
