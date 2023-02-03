@@ -1,1 +1,0 @@
-!wget http://dags.stanford.edu/data/iccv09Data.tar.gz -O stanford_background.tar.gz

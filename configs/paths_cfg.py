@@ -4,6 +4,9 @@
 MMDETECTION_ROOT = '/home/raphael/work/code/mmdetection'
 MMSEG_DIR = "/home/raphael/work/code/mmsegmentation"
 
+## Checkpoints
+CHECKPOINT_DIR = "/home/raphael/work/checkpoints/"
+
 ## Datasets
 
 # working

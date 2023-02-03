@@ -1,4 +1,4 @@
-from prepare_data.coco_convert import convert_perception
+from prepare_data.coco_convert import convert_perception #todo handle this dependancy
 import json
 import os
 
