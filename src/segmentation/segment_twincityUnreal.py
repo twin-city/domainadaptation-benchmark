@@ -15,16 +15,28 @@ import os
 # paths
 TWINCITYUNREAL_ROOT = "/home/raphael/work/datasets/twincity-Unreal/v2"
 img_dir = 'ColorImage'
-ann_dir = 'SemanticImage-format'
+ann_dir = 'SemanticImage-format-cityscapes'
+
+CLASSES = ('road', 'sidewalk', 'building', 'wall', 'fence', 'pole',
+           'traffic light', 'traffic sign', 'vegetation', 'terrain', 'sky',
+           'person', 'rider', 'car', 'truck', 'bus', 'train', 'motorcycle',
+           'bicycle')
+
+PALETTE = [[128, 64, 128], [244, 35, 232], [70, 70, 70], [102, 102, 156],
+           [190, 153, 153], [153, 153, 153], [250, 170, 30], [220, 220, 0],
+           [107, 142, 35], [152, 251, 152], [70, 130, 180], [220, 20, 60],
+           [255, 0, 0], [0, 0, 142], [0, 0, 70], [0, 60, 100],
+           [0, 80, 100], [0, 0, 230], [119, 11, 32]]
+
 
 # Parameters
-max_iter = 2000
-num_classes = 9
+max_iter = 1000
+num_classes = len(CLASSES)
 load_from = osp.join(CHECKPOINT_DIR, 'semanticsegmentation/pspnet_r50-d8_512x1024_40k_cityscapes_20200605_003338-2966598c.pth')
 #load_from = None
-configs_path = '../../configs/segmentation/pspnet/pspnet_r50-d8_512x1024_40k_cityscapes.py'
+configs_path = 'configs/segmentation/pspnet/pspnet_r50-d8_512x1024_40k_cityscapes.py'
 person_weight = 1
-work_dir = f'./work_dirs/TwincityUnreal_weight{person_weight}-{max_iter}_loaded{load_from is not None}'
+work_dir = f'./work_dirs/TwincityUnreal_weight{person_weight}-{max_iter}_loaded{load_from is not None}v2'
 
 # define class and plaette for better visualization
 class_info = pd.read_csv(osp.join(TWINCITYUNREAL_ROOT, "../SemanticClasses.csv"), header=None)
@@ -77,6 +89,8 @@ with open(osp.join(TWINCITYUNREAL_ROOT, split_dir, 'val.txt'), 'w') as f:
 
 #%% Register new dataset
 
+"""
+
 @DATASETS.register_module()
 class TwincityUnrealDataset(CustomDataset):
     CLASSES = classes
@@ -86,7 +100,7 @@ class TwincityUnrealDataset(CustomDataset):
         super().__init__(img_suffix='img.jpeg', seg_map_suffix='format_seg.png',
                          split=split, **kwargs)
         assert osp.exists(self.img_dir) and self.split is not None
-
+"""
 
 #%%
 cfg = Config.fromfile(configs_path)
@@ -169,9 +183,9 @@ cfg.work_dir = work_dir
 mmcv.mkdir_or_exist(os.path.abspath(cfg.work_dir))
 
 cfg.runner.max_iters = max_iter
-cfg.log_config.interval = 10
-cfg.evaluation.interval = 200
-cfg.checkpoint_config.interval = 200
+cfg.log_config.interval = int(max_iter/10)
+cfg.evaluation.interval = int(max_iter/2)
+cfg.checkpoint_config.interval = int(max_iter/2)
 
 # Set seed to facitate reproducing the result
 cfg.seed = 0
@@ -196,8 +210,8 @@ datasets = [build_dataset(cfg.data.train)]
 model = build_segmentor(cfg.model)
 # Add an attribute for visualization convenience
 model.CLASSES = datasets[0].CLASSES
-model.decode_head.loss_decode.class_weight = np.ones(shape=(len(palette)))
-model.decode_head.loss_decode.class_weight[-1] = person_weight
+#model.decode_head.loss_decode.class_weight = np.ones(shape=(len(palette)))
+#model.decode_head.loss_decode.class_weight[-1] = person_weight
 
 # Create work_dir
 mmcv.mkdir_or_exist(osp.abspath(cfg.work_dir))
@@ -208,6 +222,8 @@ train_segmentor(model, datasets, cfg, distributed=False, validate=True,
 # Build the detector
 #%% perform an inference on test set
 
+"""
+
 model.cfg = cfg
 model.PALETTE = palette
 
@@ -217,3 +233,4 @@ for img_id in np.arange(100,200,10):
     img_path = f"/home/raphael/work/datasets/twincity-Unreal/v2/ColorImage/BasicSequencer.0{img_id}img.jpeg"
     result = inference_segmentor(model, img_path)
     model.show_result(img_path, result, out_file=f"{work_dir}/{img_id}.png", opacity=0.5)
+"""

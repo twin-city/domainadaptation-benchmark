@@ -46,6 +46,7 @@ python convert.py --input-folder /home/raphael/work/datasets/ADE20K_2021_17_01_n
 
 
 # Inference : test on cityscapes
+Need isntall of python -m pip install cityscapesscripts
 
 ./tools/dist_test.sh configs/cityscapes/mask_rcnn_r50_fpn_1x_cityscapes.py \
     checkpoints/mask_rcnn_r50_fpn_1x_cityscapes_20200227-afe51d5a.pth \

@@ -12,10 +12,11 @@ CHECKPOINT_DIR = "/home/raphael/work/checkpoints/"
 # working
 TWINCITY_ROOT = "/home/raphael/work/datasets/twincity-dataset"
 TWINCITYUNREAL_ROOT = "/home/raphael/work/datasets/twincity-Unreal/v2"
-CITYSCAPES_ROOT = "/home/raphael/work/datasets/cityscapes/"
+CITYSCAPES_ROOT = "/home/raphael/work/datasets/cityscapes_v2/"
 CARLA_ROOT = "/home/raphael/work/datasets/CARLA/output/fixed_spawn_Town01_v1/"
 PENNFUDANPED_ROOT = "/home/raphael/work/datasets/PennFudanPed/"
 MOTSYNTH_ROOT = "/home/raphael/work/datasets/MOTSynth/"
+GTAV_ROOT = "/media/raphael/Projects/datasets/GTAV"
 
 # not working yet
 ADE20K_ROOT = "/home/raphael/work/datasets/ADE20K_2021_17_01(nococoyet)"
