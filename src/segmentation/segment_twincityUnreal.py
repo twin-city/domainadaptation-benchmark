@@ -30,7 +30,7 @@ PALETTE = [[128, 64, 128], [244, 35, 232], [70, 70, 70], [102, 102, 156],
 
 
 # Parameters
-max_iter = 1000
+max_iter = 5
 num_classes = len(CLASSES)
 load_from = osp.join(CHECKPOINT_DIR, 'semanticsegmentation/pspnet_r50-d8_512x1024_40k_cityscapes_20200605_003338-2966598c.pth')
 #load_from = None
@@ -51,6 +51,27 @@ import matplotlib.pyplot as plt
 import numpy as np
 from PIL import Image
 
+annot_example = "/home/raphael/work/datasets/twincity-Unreal/v2/SemanticImage-format-cityscapes/BasicSequencer.0008format_seg.png"
+
+# Let's take a look at the segmentation map we got
+import matplotlib.patches as mpatches
+img = Image.open(annot_example)
+plt.figure(figsize=(8, 6))
+x = np.array(img.convert('RGB'))
+im = plt.imshow(np.array(img.convert('RGB')))
+
+# create a patch (proxy artist) for every color
+patches = [mpatches.Patch(color=np.array(PALETTE[i])/255.,
+                          label=CLASSES[i]) for i in range(len(PALETTE))]
+# put those patched as legend-handles into the legend
+plt.legend(handles=patches, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.,
+           fontsize='large')
+plt.tight_layout()
+plt.show()
+
+
+#%%
+
 annot_example = "/home/raphael/work/datasets/twincity-Unreal/v2/SemanticImage-format/BasicSequencer.0008format_seg.png"
 
 # Let's take a look at the segmentation map we got
@@ -69,7 +90,12 @@ plt.legend(handles=patches, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.,
 plt.tight_layout()
 plt.show()
 
+
+
 #%%
+
+plt.imshow(x[100:300,700:-1100])
+plt.show()
 
 
 #%% Create the train/val on the fly
@@ -89,7 +115,7 @@ with open(osp.join(TWINCITYUNREAL_ROOT, split_dir, 'val.txt'), 'w') as f:
 
 #%% Register new dataset
 
-"""
+
 
 @DATASETS.register_module()
 class TwincityUnrealDataset(CustomDataset):
@@ -100,7 +126,7 @@ class TwincityUnrealDataset(CustomDataset):
         super().__init__(img_suffix='img.jpeg', seg_map_suffix='format_seg.png',
                          split=split, **kwargs)
         assert osp.exists(self.img_dir) and self.split is not None
-"""
+
 
 #%%
 cfg = Config.fromfile(configs_path)
@@ -183,9 +209,9 @@ cfg.work_dir = work_dir
 mmcv.mkdir_or_exist(os.path.abspath(cfg.work_dir))
 
 cfg.runner.max_iters = max_iter
-cfg.log_config.interval = int(max_iter/10)
-cfg.evaluation.interval = int(max_iter/2)
-cfg.checkpoint_config.interval = int(max_iter/2)
+cfg.log_config.interval = int(max_iter)
+cfg.evaluation.interval = int(max_iter)
+cfg.checkpoint_config.interval = int(max_iter)
 
 # Set seed to facitate reproducing the result
 cfg.seed = 0
@@ -218,8 +244,88 @@ mmcv.mkdir_or_exist(osp.abspath(cfg.work_dir))
 train_segmentor(model, datasets, cfg, distributed=False, validate=True,
                 meta=dict())
 
+#%%
+
+cfg_path_cityscapes = "/home/raphael/work/code/domainadaptation-benchmark/configs/pspnet_r50-d8_512x1024_40k_cityscapes.py"
+cfg_cityscapes = Config.fromfile(cfg_path_cityscapes)
+cfg_cityscapes.data_root = "/home/raphael/work/datasets/cityscapes_v2"
+cfg_cityscapes["data"]["test"]["data_root"] = "/home/raphael/work/datasets/cityscapes_v2"
+datasets = [build_dataset(cfg_cityscapes.data.test)]
+
+
+
+#%%
+
+from mmseg.apis import single_gpu_test
+from mmseg.datasets import build_dataloader
+
+data_loader = datasets
+
+distributed = False
+loader_cfg = dict(
+    # cfg.gpus will be ignored if distributed
+    num_gpus=len(cfg.gpu_ids),
+    dist=distributed,
+    workers_per_gpu=1,
+    shuffle=False)
+# The overall dataloader settings
+loader_cfg.update({
+    k: v
+    for k, v in cfg.data.items() if k not in [
+        'train', 'val', 'test', 'train_dataloader', 'val_dataloader',
+        'test_dataloader'
+    ]
+})
+test_loader_cfg = {
+    **loader_cfg,
+    'samples_per_gpu': 1,
+    'shuffle': False,  # Not shuffle by default
+    **cfg.data.get('test_dataloader', {})
+}
+# build the dataloader
+data_loader = build_dataloader(build_dataset(cfg.data.test), **test_loader_cfg)
+
+
+#%%
+
+results = single_gpu_test(
+    model,
+    data_loader)
+
+
+#%%
+
+
+
+
+"""
+    show,
+    show_dir,
+    False,
+    args.opacity,
+    pre_eval=eval is not None and not eval_on_format_results,
+    format_only=False,
+    format_args=eval_kwargs)
+"""
+
+
+
 #%% Resume from
 # Build the detector
+
+data = next(iter(data_loader))
+
+data_modified = {
+    "img_metas": [data["img_metas"][0].data],
+    "img": data["img"],
+}
+
+import torch
+model.eval()
+with torch.no_grad():
+    result = model(return_loss=False, **data_modified)
+
+
 #%% perform an inference on test set
 
 """
