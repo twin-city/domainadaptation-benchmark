@@ -1,3 +1,18 @@
+TODO
+
+- Easy test pipeline for Jehanne & Rémi
+  - pretrained Cityscapes on twincity OK
+  - (pretrained Cityscapes on GTAV, CARLA) --> travail de mapping à faire
+  - Train a twincity and get inference on Cityscapes
+  - (Train GTAV, CARLA and get inference on )
+
+Take
+- good mIoU is hard, begin with demos for JO
+- demos : 
+  - pedestrian detection
+  - dense crowd counting
+  - 
+
 
 
 

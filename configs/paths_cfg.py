@@ -17,6 +17,7 @@ CARLA_ROOT = "/home/raphael/work/datasets/CARLA/output/fixed_spawn_Town01_v1/"
 PENNFUDANPED_ROOT = "/home/raphael/work/datasets/PennFudanPed/"
 MOTSYNTH_ROOT = "/home/raphael/work/datasets/MOTSynth/"
 GTAV_ROOT = "/media/raphael/Projects/datasets/GTAV"
+MAPILLARY_ROOT = "/media/raphael/Projects/datasets/Mapillary-vistasv2"
 
 # not working yet
 ADE20K_ROOT = "/home/raphael/work/datasets/ADE20K_2021_17_01(nococoyet)"
