@@ -15,6 +15,8 @@ Clone a forked version of mmsegmentation with custom datasets \
 `cd mmdetection` \
 `pip install -v -e .` 
 
+Don't forget to add `MMSEGMENTATION_ROOT` in configs/paths_cfg.py
+
 Add tensorboard for training logs
 `conda install tensorboard`
 

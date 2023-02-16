@@ -96,6 +96,9 @@ def get_infos_for_dataset(dataset_type):
         img_dir = 'ColorImage'
         ann_dir = 'SemanticImage-format-cityscapes'
         data_root = TWINCITY_ROOT
+    else:
+        raise ValueError("Dataset not known")
+    """
     elif dataset_type == "MapillaryVistasDataset":
         img_dir = 'france'
         ann_dir = 'france-formatCityscapes'
@@ -104,7 +107,8 @@ def get_infos_for_dataset(dataset_type):
     elif dataset_type == "GTAVDataset":
         img_dir = 'images'
         ann_dir = 'labels'
-        data_root = GTAV_ROOT
+        data_root = GTAV_ROOT4
+    """
 
     return dataset_type, data_root, img_dir, ann_dir
 
@@ -116,11 +120,21 @@ if __name__ == '__main__':
 
     # For a trained Twincity model
     training_dataset_type = "CityscapesDataset"
-    checkpoint_path = osp.join(CHECKPOINT_DIR, 'semanticsegmentation/pspnet_r50-d8_512x1024_40k_cityscapes_20200605_003338-2966598c.pth')
+    pre_trained_model_name = 'pspnet_r50-d8_512x1024_40k_cityscapes_20200605_003338-2966598c.pth'
+    checkpoint_path = osp.join(CHECKPOINT_DIR, pre_trained_model_name)
     train_configs_path = 'configs/segmentation/pspnet/pspnet_r50-d8_512x1024_40k_cityscapes.py'
     test_datasets_types = ["TwincityDataset"]
 
-    # Perform inference on twincity & GTAV
+    # Check that the pre-trained model is present, if not download it
+    if not os.path.exists(osp.join(checkpoint_path, pre_trained_model_name)):
+        mmcv.mkdir_or_exist('checkpoints')
+        #pretrained_pspnet_cityscapes_url = "https://download.openmmlab.com/mmsegmentation/v0.5/pspnet/pspnet_r50-d8_512x1024_40k_cityscapes/pspnet_r50-d8_512x1024_40k_cityscapes_20200605_003338-2966598c.pth"
+        from src.utils import download_checkpoint
+        print("Downloading pre-trained model")
+        download_checkpoint('pspnet_r50-d8_512x1024_40k_cityscapes_20200605_003338-2966598c.pth', 'pspnet', 'pspnet_r50-d8_512x1024_40k_cityscapes', 'checkpoints/')
+        print("Finished downloading pre-trained model")
+
+    # Perform inference on twincity
     for dataset_type in test_datasets_types:
         output_dir = f"{OUT_ROOT}/{training_dataset_type}-2-{dataset_type}"
         data_infos = get_infos_for_dataset(dataset_type)

@@ -1,7 +1,3 @@
-from configs.paths_cfg import CITYSCAPES_ROOT
-
-CITYSCAPES_ROOT = "/home/raphael/work/datasets/cityscapes/"
-
 norm_cfg = dict(type='SyncBN', requires_grad=True)
 model = dict(
     type='EncoderDecoder',
@@ -45,7 +41,7 @@ model = dict(
     train_cfg=dict(),
     test_cfg=dict(mode='whole'))
 dataset_type = 'CityscapesDataset'
-data_root = f'{CITYSCAPES_ROOT}'
+data_root = 'data/cityscapes/'
 img_norm_cfg = dict(
     mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
 crop_size = (512, 1024)
@@ -88,7 +84,7 @@ data = dict(
     workers_per_gpu=2,
     train=dict(
         type='CityscapesDataset',
-        data_root=f'{CITYSCAPES_ROOT}',
+        data_root='data/cityscapes/',
         img_dir='leftImg8bit/train',
         ann_dir='gtFine/train',
         pipeline=[
@@ -110,7 +106,7 @@ data = dict(
         ]),
     val=dict(
         type='CityscapesDataset',
-        data_root=f'{CITYSCAPES_ROOT}',
+        data_root='data/cityscapes/',
         img_dir='leftImg8bit/val',
         ann_dir='gtFine/val',
         pipeline=[
@@ -133,7 +129,7 @@ data = dict(
         ]),
     test=dict(
         type='CityscapesDataset',
-        data_root=f'{CITYSCAPES_ROOT}',
+        data_root='data/cityscapes/',
         img_dir='leftImg8bit/val',
         ann_dir='gtFine/val',
         pipeline=[

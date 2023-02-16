@@ -4,7 +4,7 @@ legacy/
 *.pyc
 *.pth
 exps/
-
+checkpoints/
 mmsegmentation/
 mmdetection/
 tests/out/

@@ -20,8 +20,6 @@ This repo is mainly based on mmsegentation, see [README_install.md](README_insta
 
 ## Dataset Download and preparation
 
-
-
 ### Twincity dataset
   - download (contact us directly for the dataset)
   - set `$TWINCITY_ROOT` in configs/paths_cfg 
@@ -57,6 +55,9 @@ It should have added a folder `SemanticImage-format-cityscapes`.
 
 
 ## Perform inference
+- Set the paths non already changed of configs/paths_cfg.py
+  - `$CHECKPOINT_DIR` where pre-trained models will be downloaded (few hundred mo)
+  - `$OUT_ROOT` where results are stored (images, metrics)
 - from the root folder : `python src/segmentation/inference.py`
 - One ran, look at the results either at
   - .csv format [.csv table](output/benchmark/Cityscapes-2-Others.csv)
