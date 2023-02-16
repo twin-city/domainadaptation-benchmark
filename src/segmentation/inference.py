@@ -14,6 +14,7 @@ from mmseg.utils import build_dp
 from mmcv.runner import load_checkpoint
 import numpy as np
 import json
+from src.utils import download_checkpoint
 
 import pandas as pd
 from mmseg.datasets.builder import DATASETS
@@ -28,13 +29,14 @@ def make_cfg_reproducible(cfg):
     return cfg
 
 
-def perform_inference(output_dir, train_configs_path, checkpoint_path, dataset_type, data_root, img_dir, ann_dir):
+def perform_inference(output_dir, config_path, checkpoint_path, dataset_type, data_root, img_dir, ann_dir):
 
     # Output directory create
     mmcv.mkdir_or_exist(os.path.abspath(output_dir))
 
     #%% cfg
-    cfg = Config.fromfile(train_configs_path)
+    cfg = Config.fromfile(config_path)
+
     cfg = make_cfg_reproducible(cfg)
     cfg.dataset_type = dataset_type
     cfg.data_root = data_root
@@ -82,7 +84,7 @@ def perform_inference(output_dir, train_configs_path, checkpoint_path, dataset_t
 
     # Process the metrics
     metric = test_dataset.evaluate(results, ["mIoU"])
-    metric_dict = dict(config=train_configs_path, metric=metric)
+    metric_dict = dict(config=config_path, metric=metric)
     mmcv.dump(metric_dict, osp.join(output_dir,"metrics.json"), indent=4)
 
     return metric_dict
@@ -91,14 +93,10 @@ def perform_inference(output_dir, train_configs_path, checkpoint_path, dataset_t
 
 
 def get_infos_for_dataset(dataset_type):
-
     if dataset_type == "TwincityDataset":
         img_dir = 'ColorImage'
         ann_dir = 'SemanticImage-format-cityscapes'
         data_root = TWINCITY_ROOT
-    else:
-        raise ValueError("Dataset not known")
-    """
     elif dataset_type == "MapillaryVistasDataset":
         img_dir = 'france'
         ann_dir = 'france-formatCityscapes'
@@ -107,43 +105,44 @@ def get_infos_for_dataset(dataset_type):
     elif dataset_type == "GTAVDataset":
         img_dir = 'images'
         ann_dir = 'labels'
-        data_root = GTAV_ROOT4
-    """
+        data_root = GTAV_ROOT
+    else:
+        raise ValueError("Dataset not known")
 
     return dataset_type, data_root, img_dir, ann_dir
 
 
 
-if __name__ == '__main__':
+def infer_and_get_metrics(config_path, checkpoint_path, test_datasets_types):
 
-    #todo set paths in config for the pre-trained models ? Or Download them automatically
-
-    # For a trained Twincity model
-    training_dataset_type = "CityscapesDataset"
-    pre_trained_model_name = 'pspnet_r50-d8_512x1024_40k_cityscapes_20200605_003338-2966598c.pth'
-    checkpoint_path = osp.join(CHECKPOINT_DIR, pre_trained_model_name)
-    train_configs_path = 'configs/segmentation/pspnet/pspnet_r50-d8_512x1024_40k_cityscapes.py'
-    test_datasets_types = ["TwincityDataset"]
+    cfg = Config.fromfile(config_path)
+    training_dataset_type = cfg.data["train"]["type"]
+    config_name = config_path.split("/")[-1].split(".py")[0]
+    checkpoint_name = checkpoint_path.split("/")[-1]
 
     # Check that the pre-trained model is present, if not download it
-    if not os.path.exists(osp.join(checkpoint_path, pre_trained_model_name)):
-        mmcv.mkdir_or_exist('checkpoints')
-        #pretrained_pspnet_cityscapes_url = "https://download.openmmlab.com/mmsegmentation/v0.5/pspnet/pspnet_r50-d8_512x1024_40k_cityscapes/pspnet_r50-d8_512x1024_40k_cityscapes_20200605_003338-2966598c.pth"
-        from src.utils import download_checkpoint
+    if not os.path.exists(checkpoint_path):
+        checkpoint_dir = "".join(checkpoint_path.split("/")[:-1])
+        model_name = checkpoint_name.split("_")[0]
+        mmcv.mkdir_or_exist(checkpoint_dir)
+
+        url = f'https://download.openmmlab.com/mmsegmentation/v0.5/{model_name}/{config_name}/{checkpoint_name}'  # noqa
+
         print("Downloading pre-trained model")
-        download_checkpoint('pspnet_r50-d8_512x1024_40k_cityscapes_20200605_003338-2966598c.pth', 'pspnet', 'pspnet_r50-d8_512x1024_40k_cityscapes', 'checkpoints/')
+        download_checkpoint(checkpoint_name, model_name, config_name, checkpoint_dir)
         print("Finished downloading pre-trained model")
+
 
     # Perform inference on twincity
     for dataset_type in test_datasets_types:
-        output_dir = f"{OUT_ROOT}/{training_dataset_type}-2-{dataset_type}"
+        output_dir = f"{OUT_ROOT}/{training_dataset_type}-2-{dataset_type}/{config_name}"
         data_infos = get_infos_for_dataset(dataset_type)
-        perform_inference(output_dir, train_configs_path, checkpoint_path, *data_infos)
+        perform_inference(output_dir, config_path, checkpoint_path, *data_infos)
 
     # Get the results and perform assessments
     results = {}
     for dataset_type in test_datasets_types:
-        output_dir = f"{OUT_ROOT}/{training_dataset_type}-2-{dataset_type}"
+        output_dir = f"{OUT_ROOT}/{training_dataset_type}-2-{dataset_type}/{config_name}"
         json_path = osp.join(output_dir, "metrics.json")
         with open(json_path) as jsonFile:
             metrics = json.load(jsonFile)
@@ -152,9 +151,10 @@ if __name__ == '__main__':
     # Compute on a subset
     show_metric = "IoU"
     classes_subset = ('road', 'sidewalk', 'building', 'pole', 'vegetation', 'person')
+    metric_class_subset = [f"{show_metric}.{c}" for c in classes_subset]
     for dataset_type in test_datasets_types:
+        output_dir = f"{OUT_ROOT}/{training_dataset_type}-2-{dataset_type}/{config_name}"
         metric_class_value_subset = [results[dataset_type]['metric'][f"{show_metric}.{c}"] for c in classes_subset]
-        metric_class_subset = [f"{show_metric}.{c}" for c in classes_subset]
         metric_subset = np.mean(metric_class_value_subset)
         results[dataset_type]['metric'].update({f"m{show_metric}_subset": metric_subset})
         mmcv.dump(results[dataset_type], osp.join(output_dir,"metrics_subset.json"), indent=4)
@@ -163,32 +163,44 @@ if __name__ == '__main__':
 
     # Save results as a .csv, load if existing or create
     import pandas as pd
-
     csv_results_dir = osp.join("output", "benchmark")
     mmcv.mkdir_or_exist(csv_results_dir)
     csv_results_cityscapes2others = osp.join(csv_results_dir, "Cityscapes-2-Others.csv")
-    df_columns = ["mIoU", "mIoU_subset"]+metric_class_subset
+    df_columns_metrics = ["mIoU", "mIoU_subset"]+metric_class_subset
+    df_columns = ["train_dataset", "test_dataset"]+["mIoU", "mIoU_subset"]+metric_class_subset+["checkpoint_name"]
     try:
         df = pd.read_csv(csv_results_cityscapes2others)
-        assert(df.columns) == df_columns
+        df.set_index("setup", inplace=True)
+        assert list(df.columns) == df_columns
     except:
         df = pd.DataFrame(columns=df_columns)
 
     # Set values in dataframe
     for dataset_type in test_datasets_types:
-        row_index = f"{training_dataset_type.replace('Dataset','')}-2-{dataset_type.replace('Dataset','')}"
-        df = df.append(pd.DataFrame(results[dataset_type]['metric'], index=[row_index])[df.columns].round(3))
+        config_name_df = config_name if config_name != "pspnet_r50-d8_512x1024_40k_cityscapes" else "default"
+        row_index = f"{config_name_df}"
+        row_metrics = pd.DataFrame(results[dataset_type]['metric'], index=[row_index])[df_columns_metrics].round(3)
+        row_metrics["train_dataset"] = training_dataset_type.replace("Dataset", "")
+        row_metrics["test_dataset"] = dataset_type.replace("Dataset", "")
+        row_metrics["checkpoint_name"] = checkpoint_name
+
+        if row_index in df.index:
+            df.drop(row_index)
+        df = df.append(row_metrics)
 
     # Save dataframe
+    df.index.name = "setup"
     df.to_csv(csv_results_cityscapes2others)
     with open("Cityscapes2Others.md", 'w') as md:
         df.to_markdown(buf=md, tablefmt="grid")
 
 
 
-    """
-        # For a pre-trained Cityscapes model
-    training_dataset_type = "TwincityDataset"
-    checkpoint_path = osp.join(CHECKPOINT_DIR, '/home/raphael/work/code/domainadaptation-benchmark/work_dirs/legacy/TwincityUnreal_weight1-1000_loadedTruev2/latest.pth')
-    train_configs_path = '../mmsegmentation/pspnet_r50-d8_512x1024_40k_cityscapes.py'
-    """
+
+
+"""
+    # For a pre-trained Cityscapes model
+training_dataset_type = "TwincityDataset"
+checkpoint_path = osp.join(CHECKPOINT_DIR, '/home/raphael/work/code/domainadaptation-benchmark/work_dirs/legacy/TwincityUnreal_weight1-1000_loadedTruev2/latest.pth')
+config_path = '../mmsegmentation/pspnet_r50-d8_512x1024_40k_cityscapes.py'
+"""
