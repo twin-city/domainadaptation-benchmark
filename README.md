@@ -1,7 +1,6 @@
 # Assess the gap between synthetic data and real data
 
-Done with `python src/segmentation/inference.py` \
-Which performs inference of a pre-trained Cityscapes PSPNet on our synthetic data. \
+ `python main.py` performs inference of a pre-trained Cityscapes PSPNet on our synthetic data. \
 See results at [Cityscapes2Others.md](Cityscapes2Others.md).
 
 
@@ -58,7 +57,7 @@ It should have added a folder `SemanticImage-format-cityscapes`.
 - Set the paths non already changed of configs/paths_cfg.py
   - `$CHECKPOINT_DIR` where pre-trained models will be downloaded (few hundred mo)
   - `$OUT_ROOT` where results are stored (images, metrics)
-- from the root folder : `python src/segmentation/inference.py`
+- from the root folder : `python main.py`
 - One ran, look at the results either at
   - .csv format [.csv table](output/benchmark/Cityscapes-2-Others.csv)
   - .md format [.md table](Cityscapes2Others.md)
