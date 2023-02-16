@@ -52,6 +52,14 @@ TwincityUnreal
 
 It should have added a folder `SemanticImage-format-cityscapes`.
 
+- add a `TwincityUnreal/splits` folder containing a text file `val_3.txt`. Each row of `val_3.txt` should be 
+an image prefix. For example
+`
+BasicSequencer.0176 
+BasicSequencer.0164
+BasicSequencer.0305
+`
+Inference will be performed on these images only.
 
 ## Perform inference
 - Set the paths non already changed of configs/paths_cfg.py
