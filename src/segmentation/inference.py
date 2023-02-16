@@ -118,7 +118,7 @@ if __name__ == '__main__':
     training_dataset_type = "CityscapesDataset"
     checkpoint_path = osp.join(CHECKPOINT_DIR, 'semanticsegmentation/pspnet_r50-d8_512x1024_40k_cityscapes_20200605_003338-2966598c.pth')
     train_configs_path = 'configs/segmentation/pspnet/pspnet_r50-d8_512x1024_40k_cityscapes.py'
-    test_datasets_types = ["TwincityDataset", "GTAVDataset"]
+    test_datasets_types = ["TwincityDataset"]
 
     # Perform inference on twincity & GTAV
     for dataset_type in test_datasets_types:

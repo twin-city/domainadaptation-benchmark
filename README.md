@@ -2,7 +2,9 @@
 
 It is presently done by : 
 - Performing inference of a pre-trained Cityscapes PSPNet on our synthetic data. \
-See results [Cityscapes2Others.md](Cityscapes2Others.md)
+See results [Cityscapes2Others.md](Cityscapes2Others.md) with \
+
+ `python src/segmentation/inference.py`
 
 ![Cityscapes2Twincity](data/Cityscapes2Twincity.jpeg)
 *Inference on Twincity example image, from a PSPNet trained on Cityscapes*
@@ -21,10 +23,10 @@ Based on mmsegentation, see [README_install.md](README_install.md)
 
 
 
-####Twincity dataset
+### Twincity dataset
   - Download (contact us directly for the dataset)
   - set TWINCITY_ROOT in configs/paths_cfg
-  - Run src/preprocessing/
+  - Run `python src/preprocessing/prepareTwincity.py`
 
 ```
 TwincityUnreal
@@ -52,11 +54,23 @@ TwincityUnreal
 [ColorImage](..%2F..%2Fdatasets%2Ftwincity-Unreal%2Fv2%2FColorImage)
 [SemanticImage](..%2F..%2Fdatasets%2Ftwincity-Unreal%2Fv2%2FSemanticImage)
 
+## Perform inference
+- from the root folder : `python src/segmentation/inference.py`
 
-- GTAV Dataset (optional)
-  - Download GTAV semantic segmentation dataset
-  - set GTAV_ROOT in configs/paths_cfg
-  - Structure should be as follow :
+--------------------------------------------------------------
+
+--------------------------------------------------------------
+
+
+# Optional : add other datasets
+
+
+
+
+### (Optional) GTAV dataset
+- Download GTAV semantic segmentation dataset
+- set GTAV_ROOT in configs/paths_cfg
+- Structure should be as follow :
 
 ```
 GTAV
@@ -71,9 +85,7 @@ GTAV
     │   00002.png
 ```
 
-
-## Perform inference
-- from the root folder : `python src/segmentation/inference.py`
+### (Optional) MapillaryVistas, CARLA, 
 
 
 
