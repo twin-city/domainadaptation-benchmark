@@ -8,3 +8,4 @@ exps/
 mmsegmentation/
 mmdetection/
 tests/out/
+../mmsegmentation/

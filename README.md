@@ -6,6 +6,10 @@ TODO
   - Train a twincity and get inference on Cityscapes
   - (Train GTAV, CARLA and get inference on )
 
+
+Nice to have
+- no need to store the results in files
+
 Take
 - good mIoU is hard, begin with demos for JO
 - demos : 

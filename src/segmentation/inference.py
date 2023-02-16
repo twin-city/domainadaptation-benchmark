@@ -116,7 +116,7 @@ def get_infos_for_dataset(dataset_type):
 
 if __name__ == '__main__':
 
-    #todo set paths in config for the pre-trained models ?
+    #todo set paths in config for the pre-trained models ? Or Download them automatically
 
     # For a trained Twincity model
     training_dataset_type = "CityscapesDataset"
