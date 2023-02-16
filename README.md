@@ -90,7 +90,15 @@ GTAV
     │   00002.png
 ```
 
-### (Optional) MapillaryVistas, CARLA, 
+### (Optional) Other datasets
+
+- Real
+  - 1 MapillaryVistas
+  - 2 ADE20K
+- Synthetic
+  - 1 CARLA
+  - 2 Twincity Unity
+  - 3 PeopleSansPeople
 
 
 

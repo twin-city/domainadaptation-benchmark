@@ -1,3 +1,5 @@
+import os.path
+
 from src.segmentation.inference import infer_and_get_metrics
 import argparse
 import os.path as osp
@@ -12,6 +14,8 @@ def parse_args():
                         help='The pre-trained model. By default the PSPNet trained on Cityscapes.')
     parser.add_argument('--test_datasets', '--list', nargs='+', default=['TwincityDataset'],
                         help='On which dataset do we validate ?')
+    parser.add_argument('--output_root_dir', default="results/",
+                        help='Where results are stored')
     args = parser.parse_args()
     return args
 
@@ -19,7 +23,7 @@ def parse_args():
 def main():
     args = parse_args()
     checkpoint_path = osp.join(args.checkpoint_dir, args.checkpoint_name)
-    infer_and_get_metrics(args.config, checkpoint_path, args.test_datasets)
+    infer_and_get_metrics(args.config, checkpoint_path, args.test_datasets, args.output_root_dir)
 
 if __name__ == '__main__':
     """

@@ -5,6 +5,7 @@ legacy/
 *.pth
 exps/
 checkpoints/
+results/
 mmsegmentation/
 mmdetection/
 tests/out/

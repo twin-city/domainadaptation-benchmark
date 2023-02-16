@@ -113,7 +113,7 @@ def get_infos_for_dataset(dataset_type):
 
 
 
-def infer_and_get_metrics(config_path, checkpoint_path, test_datasets_types):
+def infer_and_get_metrics(config_path, checkpoint_path, test_datasets_types, output_root_dir):
 
     cfg = Config.fromfile(config_path)
     training_dataset_type = cfg.data["train"]["type"]
@@ -135,14 +135,14 @@ def infer_and_get_metrics(config_path, checkpoint_path, test_datasets_types):
 
     # Perform inference on twincity
     for dataset_type in test_datasets_types:
-        output_dir = f"{OUT_ROOT}/{training_dataset_type}-2-{dataset_type}/{config_name}"
+        output_dir = f"{output_root_dir}/{training_dataset_type}-2-{dataset_type}/{config_name}"
         data_infos = get_infos_for_dataset(dataset_type)
         perform_inference(output_dir, config_path, checkpoint_path, *data_infos)
 
     # Get the results and perform assessments
     results = {}
     for dataset_type in test_datasets_types:
-        output_dir = f"{OUT_ROOT}/{training_dataset_type}-2-{dataset_type}/{config_name}"
+        output_dir = f"{output_root_dir}/{training_dataset_type}-2-{dataset_type}/{config_name}"
         json_path = osp.join(output_dir, "metrics.json")
         with open(json_path) as jsonFile:
             metrics = json.load(jsonFile)
@@ -153,7 +153,7 @@ def infer_and_get_metrics(config_path, checkpoint_path, test_datasets_types):
     classes_subset = ('road', 'sidewalk', 'building', 'pole', 'vegetation', 'person')
     metric_class_subset = [f"{show_metric}.{c}" for c in classes_subset]
     for dataset_type in test_datasets_types:
-        output_dir = f"{OUT_ROOT}/{training_dataset_type}-2-{dataset_type}/{config_name}"
+        output_dir = f"{output_root_dir}/{training_dataset_type}-2-{dataset_type}/{config_name}"
         metric_class_value_subset = [results[dataset_type]['metric'][f"{show_metric}.{c}"] for c in classes_subset]
         metric_subset = np.mean(metric_class_value_subset)
         results[dataset_type]['metric'].update({f"m{show_metric}_subset": metric_subset})
@@ -178,14 +178,14 @@ def infer_and_get_metrics(config_path, checkpoint_path, test_datasets_types):
     # Set values in dataframe
     for dataset_type in test_datasets_types:
         config_name_df = config_name if config_name != "pspnet_r50-d8_512x1024_40k_cityscapes" else "default"
-        row_index = f"{config_name_df}"
+        row_index = f'{config_name_df}-{dataset_type.replace("Dataset", "")}'
         row_metrics = pd.DataFrame(results[dataset_type]['metric'], index=[row_index])[df_columns_metrics].round(3)
         row_metrics["train_dataset"] = training_dataset_type.replace("Dataset", "")
         row_metrics["test_dataset"] = dataset_type.replace("Dataset", "")
         row_metrics["checkpoint_name"] = checkpoint_name
 
         if row_index in df.index:
-            df.drop(row_index)
+            df = df.drop(row_index)
         df = df.append(row_metrics)
 
     # Save dataframe
