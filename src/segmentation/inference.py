@@ -95,7 +95,7 @@ def get_infos_for_dataset(dataset_type):
     if dataset_type == "TwincityDataset":
         img_dir = 'ColorImage'
         ann_dir = 'SemanticImage-format-cityscapes'
-        data_root = TWINCITYUNREAL_ROOT
+        data_root = TWINCITY_ROOT
     elif dataset_type == "MapillaryVistasDataset":
         img_dir = 'france'
         ann_dir = 'france-formatCityscapes'

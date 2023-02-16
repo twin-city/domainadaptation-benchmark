@@ -14,7 +14,7 @@ import os
 
 
 # paths
-TWINCITYUNREAL_ROOT = "/home/raphael/work/datasets/twincity-Unreal/v2"
+TWINCITY_ROOT = "/home/raphael/work/datasets/twincity-Unreal/v2"
 img_dir = 'ColorImage'
 ann_dir = 'SemanticImage'
 new_ann_dir = 'SemanticImage-format-cityscapes'
@@ -23,7 +23,7 @@ new_ann_dir = 'SemanticImage-format-cityscapes'
 threshold = 100
 
 # define class and plaette for better visualization
-class_info = pd.read_csv(osp.join(TWINCITYUNREAL_ROOT, "../SemanticClasses.csv"), header=None)
+class_info = pd.read_csv(osp.join(TWINCITY_ROOT, "../SemanticClasses.csv"), header=None)
 class_info = class_info.set_index(0)
 code = class_info.loc["Road"].values
 classes = list(class_info.index)+["Person"]
@@ -101,17 +101,17 @@ def convert_img(img, threshold=100):
 
 
 if __name__ == "__main__":
-    list_annot = list(mmcv.scandir(osp.join(TWINCITYUNREAL_ROOT, ann_dir)))
+    list_annot = list(mmcv.scandir(osp.join(TWINCITY_ROOT, ann_dir)))
     list_annot.sort()
     list_annot = [x for x in list_annot if "png" in x]
 
     for x in list_annot:
-        save_path = osp.join(TWINCITYUNREAL_ROOT, new_ann_dir, x.replace('seg.png',
+        save_path = osp.join(TWINCITY_ROOT, new_ann_dir, x.replace('seg.png',
                                                                   'format_seg.png'))
         # If image not already converted
         if not os.path.exists(save_path):
             print(x)
-            img = Image.open(osp.join(TWINCITYUNREAL_ROOT, ann_dir, x))
+            img = Image.open(osp.join(TWINCITY_ROOT, ann_dir, x))
             img = convert_img(img, threshold=100)
             img_rgb = Image.fromarray(img.astype(np.uint8)).convert('P')
             img_rgb.putpalette(np.array(PALETTE_CITYSCAPES, dtype=np.uint8))

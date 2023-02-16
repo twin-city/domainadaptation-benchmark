@@ -19,11 +19,57 @@ Based on mmsegentation, see [README_install.md](README_install.md)
 
 ## Dataset Download and preparation
 
-- Set the paths in configs/paths_cfg.py
 
-- Twincity dataset
-  - Download
+
+####Twincity dataset
+  - Download (contact us directly for the dataset)
+  - set TWINCITY_ROOT in configs/paths_cfg
   - Run src/preprocessing/
+
+```
+TwincityUnreal
+│   SemanticClasses.csv
+│
+└───v1
+│   ...
+
+│
+└───v2
+   │   file011.txt
+   │   file012.txt
+   │
+   └───ColorImage
+   │    │   BasicSequencer.0000img.jpeg
+   │    │   BasicSequencer.0001img.jpeg
+   │    │   ...
+   │ 
+   └───SemanticImage  
+       │   BasicSequencer.0001seg.jpeg
+       │   BasicSequencer.0002seg.jpeg
+       │   ...
+```
+
+[ColorImage](..%2F..%2Fdatasets%2Ftwincity-Unreal%2Fv2%2FColorImage)
+[SemanticImage](..%2F..%2Fdatasets%2Ftwincity-Unreal%2Fv2%2FSemanticImage)
+
+
+- GTAV Dataset (optional)
+  - Download GTAV semantic segmentation dataset
+  - set GTAV_ROOT in configs/paths_cfg
+  - Structure should be as follow :
+
+```
+GTAV
+│
+└───images
+│   │   00001.png
+│   │   00002.png
+│   
+│   
+└───labels
+    │   00001.png
+    │   00002.png
+```
 
 
 ## Perform inference

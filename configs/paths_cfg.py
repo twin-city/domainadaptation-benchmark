@@ -13,8 +13,8 @@ CHECKPOINT_DIR = "/home/raphael/work/checkpoints/"
 ## Datasets
 
 # working
-TWINCITY_ROOT = "/home/raphael/work/datasets/twincity-dataset"
-TWINCITYUNREAL_ROOT = "/home/raphael/work/datasets/twincity-Unreal/v2"
+TWINCITY_UNITY_ROOT = "/home/raphael/work/datasets/twincity-dataset"
+TWINCITY_ROOT = "/home/raphael/work/datasets/twincity-Unreal/v2"
 CITYSCAPES_ROOT = "/home/raphael/work/datasets/cityscapes_v2/"
 CARLA_ROOT = "/home/raphael/work/datasets/CARLA/output/fixed_spawn_Town01_v1/"
 PENNFUDANPED_ROOT = "/home/raphael/work/datasets/PennFudanPed/"
