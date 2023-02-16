@@ -28,7 +28,7 @@ def make_cfg_reproducible(cfg):
     return cfg
 
 
-def perform_inference(output_dir, train_configs_path, checkpoint_path, data_root, img_dir, ann_dir):
+def perform_inference(output_dir, train_configs_path, checkpoint_path, dataset_type, data_root, img_dir, ann_dir):
 
     # Output directory create
     mmcv.mkdir_or_exist(os.path.abspath(output_dir))
@@ -92,7 +92,7 @@ def perform_inference(output_dir, train_configs_path, checkpoint_path, data_root
 
 def get_infos_for_dataset(dataset_type):
 
-    if dataset_type == "TwincityUnrealDataset":
+    if dataset_type == "TwincityDataset":
         img_dir = 'ColorImage'
         ann_dir = 'SemanticImage-format-cityscapes'
         data_root = TWINCITYUNREAL_ROOT
@@ -106,12 +106,7 @@ def get_infos_for_dataset(dataset_type):
         ann_dir = 'labels'
         data_root = GTAV_ROOT
 
-    dataset_info_dict = {
-        "data_root": data_root,
-        "img_dir": img_dir,
-        "ann_dir": ann_dir}
-
-    return data_root, img_dir, ann_dir
+    return dataset_type, data_root, img_dir, ann_dir
 
 
 
@@ -123,18 +118,18 @@ if __name__ == '__main__':
     training_dataset_type = "CityscapesDataset"
     checkpoint_path = osp.join(CHECKPOINT_DIR, 'semanticsegmentation/pspnet_r50-d8_512x1024_40k_cityscapes_20200605_003338-2966598c.pth')
     train_configs_path = 'configs/segmentation/pspnet/pspnet_r50-d8_512x1024_40k_cityscapes.py'
-    test_datasets_types = ["TwincityUnrealDataset", "GTAVDataset"]
+    test_datasets_types = ["TwincityDataset", "GTAVDataset"]
 
     # Perform inference on twincity & GTAV
     for dataset_type in test_datasets_types:
-        output_dir = f"../output_segmentation/workdir/{training_dataset_type}-2-{dataset_type}"
+        output_dir = f"{OUT_ROOT}/{training_dataset_type}-2-{dataset_type}"
         data_infos = get_infos_for_dataset(dataset_type)
         perform_inference(output_dir, train_configs_path, checkpoint_path, *data_infos)
 
     # Get the results and perform assessments
     results = {}
     for dataset_type in test_datasets_types:
-        output_dir = f"../output_segmentation/workdir/{training_dataset_type}-2-{dataset_type}"
+        output_dir = f"{OUT_ROOT}/{training_dataset_type}-2-{dataset_type}"
         json_path = osp.join(output_dir, "metrics.json")
         with open(json_path) as jsonFile:
             metrics = json.load(jsonFile)
@@ -179,7 +174,7 @@ if __name__ == '__main__':
 
     """
         # For a pre-trained Cityscapes model
-    training_dataset_type = "TwincityUnrealDataset"
+    training_dataset_type = "TwincityDataset"
     checkpoint_path = osp.join(CHECKPOINT_DIR, '/home/raphael/work/code/domainadaptation-benchmark/work_dirs/legacy/TwincityUnreal_weight1-1000_loadedTruev2/latest.pth')
     train_configs_path = '../mmsegmentation/pspnet_r50-d8_512x1024_40k_cityscapes.py'
     """

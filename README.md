@@ -1,72 +1,35 @@
-TODO
+# Assess the gap between synthetic data and real data
 
-- Easy test pipeline for Jehanne & Rémi
-  - pretrained Cityscapes on twincity OK
-  - (pretrained Cityscapes on GTAV, CARLA) --> travail de mapping à faire
-  - Train a twincity and get inference on Cityscapes
-  - (Train GTAV, CARLA and get inference on )
+It is presently done by : 
+- Performing inference of a pre-trained Cityscapes PSPNet on our synthetic data. \
+See results [Cityscapes2Others.md](Cityscapes2Others.md)
 
+![Cityscapes2Twincity](data/Cityscapes2Twincity.jpeg)
+*Inference on Twincity example image, from a PSPNet trained on Cityscapes*
 
-Tests
-- Ne doit rien sortir
-
-
-Nice to have
-- no need to store the results in files
-
-Take
-- good mIoU is hard, begin with demos for JO
-- demos : 
-  - pedestrian detection
-  - dense crowd counting
-  - 
+In the future we will add :
+- Training a PSPNet on our synthetic data and apply it on Cityscapes (& Mapillary Vistas)
 
 
 
+# Step-by step
 
-# Domain Adaptation Benchmark
+## Installation
+Based on mmsegentation, see [README_install.md](README_install.md)
 
-This repository provides benchmark code to assess the performance of a baseline Detection algorithm (Faster-RCNN) 
-trained on synthetic data of street-scene, on real-world validation dataset.
+## Dataset Download and preparation
+
+- Set the paths in configs/paths_cfg.py
+
+- Twincity dataset
+  - Download
+  - Run src/preprocessing/
 
 
-| Training Dataset                                | Validation Dataset                   |
-|-------------------------------------------------|--------------------------------------|
-| - Twincity-unity <br/> - CARLA <br/> - MOTSynth | - PennFudan <br/> - Cityscapes <br/> |
+## Perform inference
+- from the root folder : `python src/segmentation/inference.py`
 
 
-# Installation
 
-See README_install.md
-
-# Dataset Download and preparation
-
-Datasets are converted to coco format for detection.
-
-Available datasets : 
-- PennFudan
-- MOTSynth (https://github.com/dvl-tum/motsynth-baselines)
-- Cityscapes
-
-Not available at the moment : 
-- CARLA 
-- twincity-unity
-
-Paths in file configs/paths.cfg need to be set at the respective dataset root e.g. 
-
-``MOTSYNTH_ROOT = "../datasets/MOTSynth/"``
-
-# Object Detection
-
-We use MMDetection python library (https://mmdetection.readthedocs.io/en/latest/) to train a Faster-RCNN with a ResNet50 with FPN backbone.
-
-To launch the benchmark you can run src/train_cfg.py (in progress)
-
-# Acknowledgements
-
-We base on several previous works:
-- MMDetection library
-- MOTSynth
-- CARLA
 
 This project is a joint project between Entrepreneur d'Interet General of Etalab, and the Ministry of Interior.
