@@ -1,10 +1,9 @@
 # Assess the gap between synthetic data and real data
 
-It is presently done by : 
-- Performing inference of a pre-trained Cityscapes PSPNet on our synthetic data. \
-See results [Cityscapes2Others.md](Cityscapes2Others.md) with \
+Done with `python src/segmentation/inference.py` \
+Which performs inference of a pre-trained Cityscapes PSPNet on our synthetic data. \
+See results at [Cityscapes2Others.md](Cityscapes2Others.md).
 
- `python src/segmentation/inference.py`
 
 ![Cityscapes2Twincity](data/Cityscapes2Twincity.jpeg)
 *Inference on Twincity example image, from a PSPNet trained on Cityscapes*
@@ -17,17 +16,18 @@ In the future we will add :
 # Step-by step
 
 ## Installation
-Based on mmsegentation, see [README_install.md](README_install.md)
+This repo is mainly based on mmsegentation, see [README_install.md](README_install.md)
 
 ## Dataset Download and preparation
 
 
 
 ### Twincity dataset
-  - Download (contact us directly for the dataset)
-  - set TWINCITY_ROOT in configs/paths_cfg
-  - Run `python src/preprocessing/prepareTwincity.py`
+  - download (contact us directly for the dataset)
+  - set `$TWINCITY_ROOT` in configs/paths_cfg 
 
+
+The dataset should look like this : 
 ```
 TwincityUnreal
 │   SemanticClasses.csv
@@ -51,11 +51,16 @@ TwincityUnreal
        │   ...
 ```
 
-[ColorImage](..%2F..%2Fdatasets%2Ftwincity-Unreal%2Fv2%2FColorImage)
-[SemanticImage](..%2F..%2Fdatasets%2Ftwincity-Unreal%2Fv2%2FSemanticImage)
+- Run `python src/preprocessing/proprocess_twincity.py` (temporary fix to handle the semantic extractor)
+
+It should have added a folder `SemanticImage-format-cityscapes`.
+
 
 ## Perform inference
 - from the root folder : `python src/segmentation/inference.py`
+- One ran, look at the results either at
+  - .csv format [.csv table](output/benchmark/Cityscapes-2-Others.csv)
+  - .md format [.md table](Cityscapes2Others.md)
 
 --------------------------------------------------------------
 
@@ -69,7 +74,7 @@ TwincityUnreal
 
 ### (Optional) GTAV dataset
 - Download GTAV semantic segmentation dataset
-- set GTAV_ROOT in configs/paths_cfg
+- set `GTAV_ROOT` in configs/paths_cfg
 - Structure should be as follow :
 
 ```
