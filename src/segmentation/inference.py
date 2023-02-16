@@ -1,14 +1,10 @@
 from mmcv import Config
 import mmcv
 import os.path as osp
-import pandas as pd
-from mmseg.datasets.builder import DATASETS
-from mmseg.datasets.custom import CustomDataset
 from mmseg.apis import set_random_seed
 from mmseg.utils import get_device
 from mmseg.datasets import build_dataset
 from mmseg.models import build_segmentor
-from mmseg.apis import train_segmentor
 from configs.paths_cfg import *
 import os
 from mmseg.apis import single_gpu_test
@@ -18,6 +14,11 @@ from mmseg.utils import build_dp
 from mmcv.runner import load_checkpoint
 import numpy as np
 import json
+
+import pandas as pd
+from mmseg.datasets.builder import DATASETS
+from mmseg.datasets.custom import CustomDataset
+from mmseg.apis import train_segmentor
 
 def make_cfg_reproducible(cfg):
     cfg.seed = 0
@@ -121,7 +122,7 @@ if __name__ == '__main__':
     # For a trained Twincity model
     training_dataset_type = "CityscapesDataset"
     checkpoint_path = osp.join(CHECKPOINT_DIR, 'semanticsegmentation/pspnet_r50-d8_512x1024_40k_cityscapes_20200605_003338-2966598c.pth')
-    train_configs_path = '../mmsegmentation/pspnet_r50-d8_512x1024_40k_cityscapes.py'
+    train_configs_path = 'configs/segmentation/pspnet/pspnet_r50-d8_512x1024_40k_cityscapes.py'
     test_datasets_types = ["TwincityUnrealDataset", "GTAVDataset"]
 
     # Perform inference on twincity & GTAV

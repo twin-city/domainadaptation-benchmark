@@ -7,6 +7,10 @@ TODO
   - (Train GTAV, CARLA and get inference on )
 
 
+Tests
+- Ne doit rien sortir
+
+
 Nice to have
 - no need to store the results in files
 
