@@ -1,4 +1,4 @@
 setup,train_dataset,test_dataset,mIoU,mIoU_subset,IoU.road,IoU.sidewalk,IoU.building,IoU.pole,IoU.vegetation,IoU.person,checkpoint_name
 default-Twincity,Cityscapes,Twincity,0.205,0.444,0.705,0.486,0.859,0.081,0.474,0.057,pspnet_r50-d8_512x1024_40k_cityscapes_20200605_003338-2966598c.pth
-default-GTAV,Cityscapes,GTAV,0.23,0.417,0.559,0.085,0.655,0.113,0.247,0.843,pspnet_r50-d8_512x1024_40k_cityscapes_20200605_003338-2966598c.pth
 default-MapillaryVistas,Cityscapes,MapillaryVistas,0.52,0.667,0.958,0.628,0.767,0.318,0.93,0.4,pspnet_r50-d8_512x1024_40k_cityscapes_20200605_003338-2966598c.pth
+default-GTAV,Cityscapes,GTAV,0.321,0.418,0.688,0.099,0.529,0.206,0.563,0.423,pspnet_r50-d8_512x1024_40k_cityscapes_20200605_003338-2966598c.pth
