@@ -81,17 +81,19 @@ dict_Cityscapes_2_GTAV = {i: CLASSES_GTAV.index(class_name)  for i, class_name i
 #%%
 
 from configs.paths_cfg import *
-out_dir = "/home/raphael/work/datasets/GTAV_local"
 
 ann_dir = "labels"
 new_ann_dir = "labels-format-cityscapes"
 
-mmcv.mkdir_or_exist(osp.join(out_dir, new_ann_dir))
+mmcv.mkdir_or_exist(osp.join(GTAV_ROOT, new_ann_dir))
+#%%
 
 
-for i in range(1, 10):
-    label_path = osp.join(GTAV_ROOT, ann_dir, f"0000{i}.png")
-    save_path = osp.join(out_dir, new_ann_dir, f"0000{i}.png")
+#%%
+img_names = []
+for i, img_name in enumerate(mmcv.scandir(osp.join(GTAV_ROOT, ann_dir))):
+    label_path = osp.join(GTAV_ROOT, ann_dir, img_name)
+    save_path = osp.join(GTAV_ROOT, new_ann_dir, img_name)
     img = Image.open(label_path)
     x_img = np.array(img)
     for key, val in dict_GTAV_2_Cityscapes.items():
@@ -100,6 +102,18 @@ for i in range(1, 10):
     img_rgb = Image.fromarray(x_img.astype(np.uint8)).convert('P')
     img_rgb.putpalette(np.array(PALETTE_CITYSCAPES, dtype=np.uint8))
     img_rgb.save(save_path)
+
+    img_names.append(img_name.replace(".png", ""))
+    if i>100:
+        break
+
+#%%
+
+
+with open(osp.join(GTAV_ROOT,"splits",'val_3.txt'), 'w') as f:
+    for line in img_names:
+        f.write(line)
+        f.write('\n')
 
 
 """ Eventually plot it

@@ -11,8 +11,8 @@ CHECKPOINT_DIR = "checkpoints/"
 # to be set
 TWINCITY_ROOT = "/home/raphael/work/datasets/twincity-Unreal/v2"
 
-# GTAV_ROOT = "/media/raphael/Projects/datasets/GTAV"
-GTAV_ROOT = "/home/raphael/work/datasets/GTAV_local"
+GTAV_ROOT = "/media/raphael/Projects/datasets/GTAV"
+# GTAV_ROOT = "/home/raphael/work/datasets/GTAV_local"
 
 MAPILLARY_ROOT = "/media/raphael/Projects/datasets/Mapillary-vistasv2"
 CITYSCAPES_ROOT = "/home/raphael/work/datasets/cityscapes_v2/"
