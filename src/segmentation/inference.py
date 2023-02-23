@@ -72,6 +72,8 @@ def perform_inference(output_dir, config_path, checkpoint_path, dataset_type, da
     model = revert_sync_batchnorm(model)
     model = build_dp(model, cfg.device, device_ids=cfg.gpu_ids)
 
+
+
     # Perform inference
     results = single_gpu_test(
         model,
@@ -104,7 +106,7 @@ def get_infos_for_dataset(dataset_type):
         data_root = MAPILLARY_ROOT
     elif dataset_type == "GTAVDataset":
         img_dir = 'images'
-        ann_dir = 'labels'
+        ann_dir = 'labels-format-cityscapes'
         data_root = GTAV_ROOT
     else:
         raise ValueError("Dataset not known")
